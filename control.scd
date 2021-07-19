@@ -25,7 +25,29 @@ for( 0, ~hostnames.size-1, {
 
 ~hosts[0].sendMsg( '/sineFreq', 200.0);
 ~hosts[0].sendMsg( '/sineGain', 0.5);
-~hosts[0].sendMsg( '/sinePhase', 2pi); // +- 8pi
+~hosts[0].sendMsg( '/sinePhase', -8pi); // +- 8pi
+(
+~hosts.do( {
+	arg host;
+	host.sendMsg( '/modFreq', 2.0);
+	host.sendMsg( '/carrFreq', 400.0);
+	host.sendMsg( '/gain', 0.8);
+	host.sendMsg( '/sinModOn' );
+	host.sendMsg( '/pulseModOn' );
+	host.sendMsg( '/noteOn' );
+	//host.sendMsg( '/noteOff' );
+});
+)
+
+
+~hosts[0].sendMsg( '/modFreq', 2.0);
+~hosts[0].sendMsg( '/carrFreq', 400.0);
+~hosts[0].sendMsg( '/gain', 0.8);
+~hosts[0].sendMsg( '/sinModOn' );
+~hosts[0].sendMsg( '/pulseModOn' );
+~hosts[0].sendMsg( '/noteOn' );
+~hosts[0].sendMsg( '/noteOff' );
+~hosts[0].sendMsg( '/modPhase', 8pi);
 
 -pi.postln;
 
