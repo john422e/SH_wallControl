@@ -1,10 +1,17 @@
 (
+~hostname = "pione.local";
+~hostname = "eagle2018.local";
 
-r.options.protocol = \tcp;
-r.options.bindAddress = "0.0.0.0";
-r.options.maxLogins = 2;
+//r = ServerOptions.new;
 
-r = Server.new(\piOne, NetAddr("pione.local", 57110), r.options);
+s.options.protocol = \tcp;
+s.options.bindAddress = "0.0.0.0";
+s.options.maxLogins = 2;
+
+r = Server.new(
+	\piOne,
+	NetAddr(~hostname, 57110),
+	s.options);
 
 r.boot;
 )
