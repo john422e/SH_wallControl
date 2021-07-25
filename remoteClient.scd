@@ -6,11 +6,8 @@ t.addr.connect;
 t.startAliveThread(0);
 t.doWhenBooted( { "remote tcp server started".postln; t.notify; t.initTree });
 )
-t.quit;
-s.boot;
-s.quit;
-{ SoundIn.ar( [0, 1] ) }.play;
 
+SynthDescLib.global.addServer(t);
 
 (
 SynthDef( \micOut, {
@@ -30,5 +27,3 @@ t.freeAll;
 { SinOsc.ar(220, 0, 0.4) }.play;
 
 s.plotTree;
-
-SynthDescLib.global.addServer(t);
