@@ -4,6 +4,7 @@
 // constants
 512 => int BUFFER_SIZE;
 
+
 // --------------------------------------------------------------
 // osc out ------------------------------------------------------
 // --------------------------------------------------------------
@@ -29,16 +30,10 @@ OscOut out;
 // sound chain
 
 //adc 
-SinOsc s => Gain micGain => Envelope micEnv => Delay del => blackhole;
-
+adc => Envelope micEnv => ResonZ res => Delay del => blackhole;
 // env follower
-micGain => OnePole pole => blackhole;
-// delayed signal
-// add HPF and LPF later
-
-
-//0.5 => gain.gain;
-// delay stuff
+micEnv => OnePole pole => blackhole;
+// delay of sig
 100::ms => dur delayLength;
 del.max(100::ms);
 del.delay(100::ms);
@@ -48,10 +43,10 @@ del.delay(100::ms);
 0.9999 => pole.pole;
 
 // thresholds in decibels
-//10 => float threshold;
+1 => float threshold;
 
 // this determines how much audio is send through in milliseconds
-500::ms => dur packetLength;
+100::ms => dur packetLength;
 
 // set ip and port for osc out
 out.dest(IP, OUT_PORT);
@@ -62,18 +57,29 @@ out.add(BUFFER_SIZE);
 out.send();
 
 
-fun void envFollower() {
-	while( true ) {
-		if( pole.last() > 0.01 ) {
-			<<< "BANG" >>>;
-			80::ms => now;
-		}
-		//else <<< pole.last() >>>;
-		20::ms => now;
-	}
+// this runs the show
+spork ~ envelopeFollower();
+
+
+
+
+// envelope follower
+fun void envelopeFollower() {
+    // loops until the db limit is reached
+    while( true ) {
+        while( Std.rmstodb(pole.last()) < threshold ) {
+            1::samp => now;
+        }
+        <<< "SOUND", "" >>>;
+        send();
+        now => time past;
+        
+        while( now < past + packetLength ) {
+            send();
+        }
+    }
 }
 
-//spork ~ envFollower();
 
 // sends out audio in 512 sample blocks
 
@@ -83,8 +89,8 @@ fun void send() {
 	
 	// add last 512 samples from del
 	for (0 => int j; j < BUFFER_SIZE; j++) {
-        out.add( pole.last() );
-		1::samp => now; // 2::samp => now;
+        out.add( del.last() );
+		1::samp => now;
     }
 	// send it
     out.send();
@@ -94,6 +100,6 @@ fun void send() {
 micEnv.keyOn();
 // loop it
 while (true) {
-	send();
+    1::ms => now;
 	//100::ms => now;
 }
