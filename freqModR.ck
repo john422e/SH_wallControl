@@ -2,26 +2,23 @@
 OscIn in;
 OscMsg msg;
 
-10002 => in.port;
+10003 => in.port;
 in.listenAll();
 
 // sound chain
 SinOsc mod1 => Envelope sinMod => Envelope carrEnv => Envelope e;
 PulseOsc mod2 => Envelope pulseMod => carrEnv => e;
-SinOsc carr => e => dac;
-
+// SinOsc carr => e => dac.right; // carrier
+Noise carr => e => dac.right; // testing carrier as noise osc
 3 => e.op; // multiply inputs
-3 => carrEnv.op; // multiply inputs // was add?
+3 => carrEnv.op; // add inputs
 carrEnv.keyOn();
 
 
 // loop it
 while (true) {
-	<<< "LISTENING" >>>;
     in => now;
-	// wait for a message
     while( in.recv(msg)) {
-		<<< "SOMETHING IN" >>>;
         // noteOn/noteOff messages
         if( msg.address == "/noteOn") e.keyOn();
         if( msg.address == "/noteOff") e.keyOff();
@@ -36,14 +33,20 @@ while (true) {
             <<< "/modFreq", mod1.freq() >>>;
         }
         // phase of the modulator
-        if( msg.address == "/modPhase") {
+        if( msg.address == "/mod1Phase") {
             msg.getFloat(0) => mod1.phase;
-            <<< "/modPhase", mod1.phase() >>>;
+            <<< "/mod1Phase", mod1.phase() >>>;
         }
+		// phase of the modulator
+		if( msg.address == "/mod2Phase") {
+			msg.getFloat(0) => mod2.phase;
+			<<< "/mod2Phase", mod2.phase() >>>;
+		}
         // frequency of the carrier
         if( msg.address == "/carrFreq") {
-            msg.getFloat(0) => carr.freq;
-            <<< "/carrFreq", carr.freq() >>>;
+			<<< "noise instead of sin, testing " >>>;
+            //msg.getFloat(0) => carr.freq;
+            //<<< "/carrFreq", carr.freq() >>>;
         }
         // gain
         if( msg.address == "/gain") {
@@ -52,6 +55,5 @@ while (true) {
             <<< "/gain", e.target() >>>;
         }
     }
-	<<< "NADA" >>>;
     1::samp => now;
 }
