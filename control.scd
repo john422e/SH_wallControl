@@ -1,15 +1,15 @@
 (
 var port=10002;
 ~hostnames = [
-	"eagle2018.local"
-	//"pione.local",
-	//"pitwo.local",
-	//"pithree.local",
-	//"pifour.local",
-	//"pifive.local",
-	//"pisix.local",
-	//"piseven.local",
-	//"pieight.local",
+	//"eagle2018.local"
+	"pione.local",
+	"pitwo.local",
+	"pithree.local",
+	"pifour.local",
+	"pifive.local",
+	"pisix.local",
+	"piseven.local",
+	"pieight.local",
 	//"eagle2018.local"
 ];
 ~hosts = Array.new(1);
@@ -25,7 +25,7 @@ for( 0, ~hostnames.size-1, {
 )
 
 ~hosts[0].postln;
-~hosts[0].sendMsg( '/gain', 300.0);
+~hosts[0].sendMsg( '/gain', 1.0);
 NetAddr.disconnectAll;
 ~hosts[0].disconnect;
 ~hosts;
@@ -51,11 +51,11 @@ NetAddr.disconnectAll;
 	host.sendMsg( '/noteOff' );
 });
 )
-
+~hosts
 ~hosts[0].sendMsg( '/noteOn' );
 ~hosts[1].sendMsg( '/noteOn' );
 
-~hosts[0].sendMsg( '/carrFreq', 800.0 );
+~hosts[0].sendMsg( '/carrFreq', 700.0 );
 ~hosts[1].sendMsg( '/carrFreq', 800.0 );
 
 ~hosts[1].sendMsg( 'mod1Phase', -pi );
@@ -64,7 +64,7 @@ NetAddr.disconnectAll;
 ~hosts[1].sendMsg( '/modFreq', 2.0);
 ~hosts[0].sendMsg( '/carrFreq', 830.0);
 ~hosts[0].sendMsg( '/modFreq', 3.0);
-~hosts[1].sendMsg( '/gain', 0.15);
+~hosts[0].sendMsg( '/gain', 0.15);
 ~hosts[0].sendMsg( '/sinModOn' );
 ~hosts[0].sendMsg( '/pulseModOn' );
 ~hosts[0].sendMsg( '/noteOn' );

@@ -9,7 +9,8 @@
 // --------------------------------------------------------------
 
 // ip address
-"eagle2018.local" => string IP;
+//"eagle2018.local" => string IP;
+"pione.local" => string IP;
 
 // port is the same for all outgoing messages
 10001 => int OUT_PORT;

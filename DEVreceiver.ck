@@ -14,6 +14,7 @@ Step st => Gain stGain => dac;
 
 // constant
 512 => int bufferSize;
+0.0 => float sampVal;
 
 // loop it
 while (true) {
@@ -21,7 +22,10 @@ while (true) {
     while (in.recv(msg)) {
         // receive packet of audio samples
         if (msg.address == "/m") {
-            <<< "received sound", msg.getFloat(0) >>>;
+			msg.getFloat(0) => sampVal;
+			if( sampVal > 0.5 ) {
+				<<< "received sound above 0.5 gain", sampVal >>>;
+			}
             stGain.gain(1.0);
             // start the sample playback
             for (0 => int i; i < bufferSize; i++) {
