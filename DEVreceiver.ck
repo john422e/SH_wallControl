@@ -22,9 +22,10 @@ while (true) {
     while (in.recv(msg)) {
         // receive packet of audio samples
         if (msg.address == "/m") {
+			<<< "received sound" >>>;
 			msg.getFloat(0) => sampVal;
 			if( sampVal > 0.5 ) {
-				<<< "received sound above 0.5 gain", sampVal >>>;
+				<<< "above 0.5 gain", sampVal >>>;
 			}
             stGain.gain(1.0);
             // start the sample playback
