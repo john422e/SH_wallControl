@@ -52,8 +52,11 @@ fun void oscListener() {
       // carrOscs on/off
       if( msg.address == "/noteOn") masterEnvs[synth].keyOn();
       if( msg.address == "/noteOff") masterEnvs[synth].keyOff();
-      // carrOsc freq
+      if( msg.address == "/carrOn") carrEnv[synth].keyOn();
+      if( msg.address == "/carrOff") carrEnv[synth].keyOff();
+      // carrOsc freq/harmonics
       if( msg.address == "/carrFreq") msg.getFloat(1) => carrOscs[synth].freq;
+      if( msg.address == "/harmonics") msg.getInt(1) => carrOscs[synth].harmonics;
       // modulator on/off ---- combine these?
       if( msg.address == "/modOn") modEnvs[synth].keyOn();
       if( msg.address == "/modOff") modEnvs[synth].keyOff();
