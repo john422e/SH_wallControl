@@ -58,7 +58,7 @@ fun void oscListener() {
       if( msg.address == "/modOn") modEnvs[synth].keyOn();
       if( msg.address == "/modOff") modEnvs[synth].keyOff();
       if( msg.address == "/pulseOn") pulseEnvs[synth].keyOn();
-      if( msg.address == "/pulseOff") pulseEnvs[synth].keyOff():
+      if( msg.address == "/pulseOff") pulseEnvs[synth].keyOff();
       // mod freq
       if( msg.address == "/modFreq") msg.getFloat(1) => mods[synth].freq;
       if( msg.address == "/pulseFreq") msg.getFloat(1) => pulseOscs[synth].freq;
