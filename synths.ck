@@ -67,7 +67,6 @@ fun void oscListener() {
       if( msg.address == "/gain") {
         msg.getFloat(1) => masterEnvs[synth].target;
         masterEnvs[synth].keyOn();
-        }
       }
     }
   }
