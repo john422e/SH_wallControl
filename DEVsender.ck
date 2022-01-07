@@ -35,6 +35,7 @@ adc => Envelope micEnv => ResonZ res => Delay del => blackhole;
 micEnv => OnePole pole => blackhole;
 // delay of sig
 100::ms => dur delayLength;
+5::ms => delayLength;
 del.max(100::ms);
 del.delay(100::ms);
 
