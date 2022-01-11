@@ -59,6 +59,7 @@ fun void bufPlayLoop( SndBuf buf, Envelope env ) {
 		}
 	0 => sampCounter;
 	}
+    env.keyOff();
 }
 
 
@@ -69,5 +70,7 @@ fun void bufPlayLoop( SndBuf buf, Envelope env ) {
 spork ~ bufPlayLoop( fieldRecs[0], bufEnvs[0] );
 
 
-15::second => now;
+10::second => now;
 0 => bufLoop;
+<<< "STILL GOING" >>>;
+10::second => now;

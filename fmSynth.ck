@@ -1,6 +1,6 @@
 /*
 for SH@theWende, 2022 - john eagle
-2 synth defs on each pi
+2 synths (chan 1, 2) on each pi
 */
 
 // -----------------------------------------------------------------------------
@@ -50,8 +50,8 @@ fun void oscListener() {
       msg.getInt(0) => synth;
 
       // carrOscs on/off
-      if( msg.address == "/noteOn") masterEnvs[synth].keyOn();
-      if( msg.address == "/noteOff") masterEnvs[synth].keyOff();
+      if( msg.address == "/fmOn") masterEnvs[synth].keyOn();
+      if( msg.address == "/fmOff") masterEnvs[synth].keyOff();
       if( msg.address == "/carrOn") carrEnvs[synth].keyOn();
       if( msg.address == "/carrOff") carrEnvs[synth].keyOff();
       // carrOsc freq/harmonics
@@ -67,7 +67,7 @@ fun void oscListener() {
       if( msg.address == "/pulseFreq") msg.getFloat(1) => pulseOscs[synth].freq;
       if( msg.address == "/pulseWidth") msg.getFloat(1) => pulseOscs[synth].width;
       // gain
-      if( msg.address == "/gain") {
+      if( msg.address == "/fmGain") {
         msg.getFloat(1) => masterEnvs[synth].target;
         masterEnvs[synth].keyOn();
       }

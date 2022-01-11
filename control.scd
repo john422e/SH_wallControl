@@ -1,7 +1,10 @@
+// -----------------------------------------------------
+// HOST SETUP
+// -----------------------------------------------------
 (
+// SETS UP 8 PI HOSTS
 var port=10002;
 ~hostnames = [
-	//"eagle2018.local"
 	"pione.local",
 	"pitwo.local",
 	"pithree.local",
@@ -9,9 +12,24 @@ var port=10002;
 	"pifive.local",
 	"pisix.local",
 	"piseven.local",
-	"pieight.local",
-	//"eagle2018.local"
+	"pieight.local"
 ];
+~hosts = Array.new(8);
+// set up each host with hostname and port
+
+for( 0, ~hostnames.size-1, {
+	arg i;
+	var host;
+	[~hostnames[i], port].postln;
+	host = NetAddr.new(~hostnames[i], port);
+	~hosts.add(host);
+});
+)
+
+(
+// SET UP LOCAL HOST (FOR TESTING ONLY)
+var port=10033;
+~hostnames = [ "eagle2018.local"];
 ~hosts = Array.new(1);
 // set up each host with hostname and port
 
@@ -24,61 +42,98 @@ for( 0, ~hostnames.size-1, {
 });
 )
 
-~hosts[0].postln;
-~hosts[0].sendMsg( '/gain', 1.0);
-NetAddr.disconnectAll;
-~hosts[0].disconnect;
-~hosts;
+
+
+// -----------------------------------------------------
+// FUNCTIONS
+// -----------------------------------------------------
+
+~hosts[0].sendMsg( '/synthOn', 0);
+~hosts[0].sendMsg( '/synthOff', 0);
+~hosts[0].sendMsg( '/synthOn', 1);
+~hosts[0].sendMsg( '/synthOff', 1);
+~hosts[0].sendMsg( '/synthHarmonics', 0, 1);
+~hosts[0].sendMsg( '/synthHarmonics', 1, 1);
+~hosts[0].sendMsg( '/synthFreq', 1, 440.0);
+
+rrand(-1.0, 1.0);
+
 (
-~hostname = "eagle2018.local";
-~hosts = [NetAddr.new(~hostname, 10002), NetAddr.new(~hostname, 10003)]
+Routine {
+	8.do {
+		arg i;
+		i.postln;
+		~hosts[0].sendMsg( '/bufPan', i, rrand(0.0, 0.0));
+		~hosts[0].sendMsg( '/bufFilterFreq', i, rrand(100.0, 500.0));
+		~res = rrand(20.0, 40.0).postln;
+		~hosts[0].sendMsg( '/bufFilterQ', i, ~res); // 0.58 for flattish
+		~hosts[0].sendMsg( '/bufGain', i, (~res/4));
+		~hosts[0].sendMsg( '/bufOn', i);
+		1.wait;
+		~hosts[0].sendMsg( '/bufOff', i);
+		0.25.wait;
+	};
+}.play;
+)
+
+(
+~setOneParam = {
+	// expects an array of 8 integers
+	arg synth=0, address='/carrFreq', vals=Array.fill(8, {440.0});
+	[address, vals].postln;
+	~hosts.do( {
+		arg host, i;
+		host.sendMsg( address, synth, vals[i]);
+	});
+};
+
+~setSineMode = {
+	arg synth=0, gate=0; // 0 = set but don't turn on, 1 = set and turn on
+	~hosts.do( {
+		arg host;
+		host.sendMsg( '/modFreq', synth, 0.0);
+		host.sendMsg( '/modOn', synth);
+		host.sendMsg( '/pulseWidth', synth, 1.0);
+		host.sendMsg( '/pulseOn', synth);
+		host.sendMsg( '/harmonics', synth, 1);
+		host.sendMsg( '/carrOn', synth);
+		if( gate == 1, { host.sendMsg( '/fmOn', synth) });
+	});
+};
 )
 
 
-~hosts[0].sendMsg( '/sineFreq', 200.0);
-~hosts[0].sendMsg( '/sineGain', 0.5);
-~hosts[0].sendMsg( '/sinePhase', -8pi); // +- 8pi
-~hosts[1].sendMsg( '/print', "SOMETHING");
-(
-~hosts.do( {
-	arg host;
-	host.sendMsg( '/modFreq', 1.0);
-	//host.sendMsg( '/carrFreq', 800.0);
-	host.sendMsg( '/gain', 0.4);
-	host.sendMsg( '/sinModOn' );
-	host.sendMsg( '/pulseModOn' );
-	host.sendMsg( '/noteOn' );
-	host.sendMsg( '/noteOff' );
-});
-)
-~hosts
-~hosts[0].sendMsg( '/noteOn' );
-~hosts[1].sendMsg( '/noteOn' );
+// -----------------------------------------------------
+// EVENTS
+// -----------------------------------------------------
+~setOneParam.(0, '/harmonics', [1, 1, 1, 2, 1, 2, 1, 2]);
+~setOneParam.(0, '/carrFreq', Array.fill(8, { rrand(110.0, 330.0) }));
+~setOneParam.(0, '/carrFreq', Array.fill(8, { 440.0 }));
+~setOneParam.(0, '/modFreq', Array.fill(8, { 0.0 }));
+~setOneParam.(0, '/modOff');
+~setOneParam.(0, '/modOn');
+~setOneParam.(0, '/pulseFreq', Array.fill(8, {3.0}));
+~setOneParam.(0, '/pulseWidth', Array.fill(8, {0.25}));
+~setOneParam.(0, '/fmOff');
+~setOneParam.(0, '/fmOn');
+~setOneParam.(0, '/pulseOn');
+~setOneParam.(0, '/pulseOff');
+~setSineMode.(0, 1);
+~setSineMode.(1, 1);
+~setOneParam.(0, '/modFreq', Array.fill(8, { 120.0 }));
+~setOneParam.(0, '/fmGain', Array.fill(8, {1.0}));
 
-~hosts[0].sendMsg( '/carrFreq', 700.0 );
-~hosts[1].sendMsg( '/carrFreq', 800.0 );
+/*
+run:
+-stdSynth.ck for sustained tones
+-fmSynth.ck for fm/pulsing tones
 
-~hosts[1].sendMsg( 'mod1Phase', -pi );
+make a mode with sensor mapped to modFreq
 
-~hosts[0].sendMsg( '/modFreq', 2.0);
-~hosts[1].sendMsg( '/modFreq', 2.0);
-~hosts[0].sendMsg( '/carrFreq', 830.0);
-~hosts[0].sendMsg( '/modFreq', 3.0);
-~hosts[0].sendMsg( '/gain', 0.15);
-~hosts[0].sendMsg( '/sinModOn' );
-~hosts[0].sendMsg( '/pulseModOn' );
-~hosts[0].sendMsg( '/noteOn' );
-~hosts[0].sendMsg( '/noteOff' );
-~hosts[0].sendMsg( '/modPhase', 8pi);
+ring modulation mode
 
--pi.postln;
+fieldPlay mode (add BP filters on each synth)
 
-(
-~hostname = "eagle2018.local";
-~host = NetAddr.new(~hostname, 10001);
-)
+try master patch
 
-~host.sendMsg( '/distance', 45.0);
-~host.sendMsg( '/distance', (35/2) + 10);
-~host.sendMsg( '/distance', rrand(10.0, 45.0) );
-~host.sendMsg( '/newGroup' );
+*/
