@@ -1,11 +1,10 @@
 (
 var wWidth=1000, wHeight=800, title="SOUND HOUSE";
-var modeButton;
+var ternaryStateButton, fmPulseStateButton, fieldPlayStateButton, feedbackStateButton;
 
-~modes = ['ternaryCode', 'fieldPlay', 'feedback'];
-~currentMode = ~modes[0];
-
-// BUILD WINDOW -----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+// BUILD WINDOW
+//-----------------------------------------------------------------------------------
 Window.closeAll;
 w = Window(title, Rect(0, 200, wWidth, wHeight))
 .front
@@ -15,33 +14,96 @@ w.onClose_( {
 	} );
 w.view.decorator_(FlowLayout(w.bounds, 10@10, 10@10));
 
-modeButton = Button(w, Rect(20, 20, 100, 20))
+//-----------------------------------------------------------------------------------
+// STATE BUTTONS
+//-----------------------------------------------------------------------------------
+
+// set a global binary var for each mode
+~ternaryState = 0;
+ternaryStateButton = Button(w, 160@30)
 .states_([
-	["TERNARY CODE", Color.black, Color.red],
-	["FIELD PLAY", Color.black, Color.blue],
-	["FEEDBACK", Color.black, Color.orange]
+	["TERNARY MODE IS OFF", Color.black, Color.red],
+	["TERNARY MODE IS ON", Color.black, Color.green]
 ])
 .action_( {
 	arg butt;
+	if( ~ternaryState == 0,
+		{
+			// TURN ON
+			~ternaryState = 1;
+			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
+		},
+		{
+			// TURN OFF
+			~ternaryState = 0;
+			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
+	});
+	["TERNARY STATE:", ~ternaryState].postln;
+});
 
+~fmPulseState = 0;
+fmPulseStateButton = Button(w, 170@30)
+.states_([
+	["FM PULSE MODE IS OFF", Color.black, Color.red],
+	["FM PULSE MODE IS ON", Color.black, Color.green]
+])
+.action_( {
+	arg butt;
+	if( ~fmPulseState == 0,
+		{
+			// TURN ON
+			~fmPulseState = 1;
+			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
+		},
+		{
+			// TURN OFF
+			~fmPulseState = 0;
+			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
+	});
+	["FM PULSE STATE:", ~fmPulseState].postln;
+});
 
+~fieldPlayState = 0;
+fieldPlayStateButton = Button(w, 170@30)
+.states_([
+	["FIELDPLAY MODE IS OFF", Color.black, Color.red],
+	["FIELDPLAY MODE IS ON", Color.black, Color.green]
+])
+.action_( {
+	arg butt;
+	if( ~fieldPlayState == 0,
+		{
+			// TURN ON
+			~fieldPlayState = 1;
+			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
+		},
+		{
+			// TURN OFF
+			~fieldPlayState = 0;
+			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
+	});
+	["FIELDPLAY STATE:", ~fieldPlayState].postln;
+});
+
+~feedbackState = 0;
+feedbackStateButton = Button(w, 170@30)
+.states_([
+	["FEEDBACK MODE IS OFF", Color.black, Color.red],
+	["FEEDBACK MODE IS ON", Color.black, Color.green]
+])
+.action_( {
+	arg butt;
+	if( ~feedbackState == 0,
+		{
+			// TURN ON
+			~feedbackState = 1;
+			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
+		},
+		{
+			// TURN OFF
+			~feedbackState = 0;
+			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
+	});
+	["FEEDBACK STATE:", ~feedbackState].postln;
+});
 )
-
-
-(
-w = Window.new("The Four Noble Truths");
-
-b = Button(w, Rect(20, 20, 340, 30))
-        .states_([
-            ["there is suffering", Color.black, Color.red],
-            ["the origin of suffering", Color.white, Color.black],
-            ["the cessation of suffering", Color.red, Color.white],
-            ["there is a path to cessation of suffering", Color.blue, Color.clear]
-        ])
-        .action_({ arg butt;
-            butt.value.postln;
-        });
-w.front;
-)
-
-b.value_(3);
