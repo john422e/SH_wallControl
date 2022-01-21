@@ -9,7 +9,7 @@ for SH@theWende, 2022 - john eagle
 OscIn in;
 OscMsg msg;
 
-10002 => in.port;
+10000 => in.port;
 in.listenAll();
 
 // -----------------------------------------------------------------------------
@@ -40,10 +40,10 @@ fun void oscListener() {
       <<< msg.address >>>;
       msg.getInt(0) => synth;
 
-      // carrOscs on/off
+      // synth on/off
       if( msg.address == "/synthOn") synthEnvs[synth].keyOn();
       if( msg.address == "/synthOff") synthEnvs[synth].keyOff();
-      // carrOsc freq/harmonics
+      // synth freq/harmonics
       if( msg.address == "/synthFreq") msg.getFloat(1) => synths[synth].freq;
       if( msg.address == "/synthHarmonics") msg.getInt(1) => synths[synth].harmonics;
       // gain

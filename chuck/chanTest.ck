@@ -1,5 +1,8 @@
-SinOsc s => Envelope e1 => dac.left;
-SinOsc t => Envelope e2 => dac.right;
+SinOsc s => Envelope e1 => dac.chan(0);
+SinOsc t => Envelope e2 => dac.chan(1);
+
+0.5 => s.gain;
+0.5 => t.gain;
 
 440 => s.freq;
 660 => t.freq;

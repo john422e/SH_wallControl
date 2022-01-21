@@ -29,14 +29,19 @@ ternaryStateButton = Button(w, 160@30)
 	arg butt;
 	if( ~ternaryState == 0,
 		{
+			var synthNum; // change this if needed
 			// TURN ON
 			~ternaryState = 1;
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
+			~sendSines.(~ternaryFreqs, Array.fill(8, { synthNum }), Array.fill(8, { 1 }), Array.fill(8, { 1.0 }));
 		},
 		{
+			var synthNum; // change this if needed
 			// TURN OFF
 			~ternaryState = 0;
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
+			~turnSinesOff.(Array.fill(8, { synthNum }));
+
 	});
 	["TERNARY STATE:", ~ternaryState].postln;
 });
@@ -54,11 +59,13 @@ fmPulseStateButton = Button(w, 170@30)
 			// TURN ON
 			~fmPulseState = 1;
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
+			~getAndSendPhasePulse.();
 		},
 		{
 			// TURN OFF
 			~fmPulseState = 0;
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
+			~turnPulseOff.();
 	});
 	["FM PULSE STATE:", ~fmPulseState].postln;
 });

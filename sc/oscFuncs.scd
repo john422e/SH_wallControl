@@ -1,48 +1,41 @@
 // -----------------------------------------------------
 // HOST SETUP
 // -----------------------------------------------------
+~devMode = false;
+//~devMode = true;
 (
-// SETS UP 8 PI HOSTS
-var port=10002;
-~hostnames = [
-	"pione.local",
-	"pitwo.local",
-	"pithree.local",
-	"pifour.local",
-	"pifive.local",
-	"pisix.local",
-	"piseven.local",
-	"pieight.local"
-];
-~hosts = Array.new(8);
-// set up each host with hostname and port
-
-for( 0, ~hostnames.size-1, {
-	arg i;
-	var host;
-	[~hostnames[i], port].postln;
-	host = NetAddr.new(~hostnames[i], port);
-	~hosts.add(host);
-});
-)
-
-(
-// SET UP LOCAL HOST (FOR TESTING ONLY)
-var port=10033;
-~hostnames = [ "eagle2018.local"];
-~hosts = Array.new(1);
-// set up each host with hostname and port
-
-for( 0, ~hostnames.size-1, {
-	arg i;
-	var host;
-	[~hostnames[i], port].postln;
-	host = NetAddr.new(~hostnames[i], port);
-	~hosts.add(host);
-});
+if( ~devMode == true,
+	{
+		// set up a local host on 8 different ports
+		var ports = Array.fill(8, { arg i; 10000 + i });
+		~localIP = "127.0.0.1";
+		~hosts = Array.fill(8, { arg i; NetAddr.new(~localIP, ports[i])});
+	},
+	{
+		// else, set up 8 pi hosts on the same port
+		var port=10002;
+		~hostnames = [
+			"pione.local",
+			"pitwo.local",
+			"pithree.local",
+			"pifour.local",
+			"pifive.local",
+			"pisix.local",
+			"piseven.local",
+			"pieight.local"
+		];
+		~hosts = Array.fill( 8, { arg i; NetAddr.new( ~hostnames[i], port )});
+	}
+);
 )
 
 
+
+
+~hosts[0].sendMsg( '/sensorInit'); // do first: start python program
+~hosts[0].sendMsg( '/sensorClose'); // do last: close python and chuck programs
+~hosts[0].sendMsg( '/sensorOn'); // start pinging
+~hosts[0].sendMsg( '/sensorOff'); // stop pinging
 
 // -----------------------------------------------------
 // FUNCTIONS
@@ -100,6 +93,57 @@ Routine {
 		if( gate == 1, { host.sendMsg( '/fmOn', synth) });
 	});
 };
+
+~sendSines = {
+	arg freqs = Array.fill(8, { 440.0}), synthNums = Array.fill(8, { 0 }), numHarms = Array.fill(8, { 1 }), amps = Array.fill(8, { 1.0});
+	// synthNum = 0 or 1 (transducer or spkr)
+	// all messages must have this order: address, synthNum, value
+	~hosts.do( {
+		arg host, i;
+		host.sendMsg( '/synthFreq', synthNums[i], freqs[i]); // send freq
+		host.sendMsg( '/synthHarmonics', synthNums[i], numHarms[i]); // send numHarms
+		host.sendMsg( '/synthGain', synthNums[i], amps[i]); // set gain
+		host.sendMsg( '/synthOn', synthNums[i]); // turn on
+	});
+};
+
+~turnSinesOff = {
+	arg synthNums = Array.fill(8, { 0 });
+	~hosts.do( {
+		arg host, i;
+		host.sendMsg( '/synthOff', synthNums[i]); // turn off
+	});
+};
+
+~getAndSendPhasePulse = {
+	arg synthNums = Array.fill(8, {0}), numHarms = Array.fill(8, {1}), amps = Array.fill(8, {1.0});
+	var freqs, pulseRate;
+	// synthNum = 0 or 1 (transducer or spkr)
+	// all messages have this order: address, synthNum, value
+	freqs = ~getPhaseFreqs.();
+	pulseRate = ~getPulseRate.();
+	~hosts.do( {
+		arg host, i;
+		host.sendMsg('/pulseFreq', synthNums[i], pulseRate); // set pulseRate
+		host.sendMsg('/carrFreq', synthNums[i], freqs[i]); // set freq
+		host.sendMsg('/harmonics', synthNums[i], numHarms[i]); // set numHarms
+		host.sendMsg('/fmGain', synthNums[i], numHarms[i]); // set gain
+
+		// check to see if I need all of these?
+		host.sendMsg('/fmOn', synthNums[i]);
+		host.sendMsg('/modOn', synthNums[i]);
+		host.sendMsg('/pulseOn', synthNums[i]);
+	});
+};
+
+~turnPulseOff = {
+	arg synthNums = Array.fill(8, {0});
+	~hosts.do( {
+		arg host, i;
+		host.sendMsg( '/fmOff', synthNums[i]);
+	});
+};
+
 )
 
 
