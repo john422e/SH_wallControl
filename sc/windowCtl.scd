@@ -1,6 +1,6 @@
 (
 var wWidth=1000, wHeight=800, title="SOUND HOUSE";
-var ternaryStateButton, fmPulseStateButton, fieldPlayStateButton, feedbackStateButton;
+var ternaryStateButton, pulseStateButton, fieldPlayStateButton, feedbackStateButton;
 
 //-----------------------------------------------------------------------------------
 // BUILD WINDOW
@@ -29,14 +29,14 @@ ternaryStateButton = Button(w, 160@30)
 	arg butt;
 	if( ~ternaryState == 0,
 		{
-			var synthNum; // change this if needed
+			var synthNum=1, gain=0.5; // change this if needed
 			// TURN ON
 			~ternaryState = 1;
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
-			~sendSines.(~ternaryFreqs, Array.fill(8, { synthNum }), Array.fill(8, { 1 }), Array.fill(8, { 1.0 }));
+			~sendSines.(~ternaryFreqs, Array.fill(8, { synthNum }), Array.fill(8, { 1 }), Array.fill(8, { gain }));
 		},
 		{
-			var synthNum; // change this if needed
+			var synthNum=1; // change this if needed
 			// TURN OFF
 			~ternaryState = 0;
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
@@ -46,28 +46,28 @@ ternaryStateButton = Button(w, 160@30)
 	["TERNARY STATE:", ~ternaryState].postln;
 });
 
-~fmPulseState = 0;
-fmPulseStateButton = Button(w, 170@30)
+~pulseState = 0;
+pulseStateButton = Button(w, 170@30)
 .states_([
-	["FM PULSE MODE IS OFF", Color.black, Color.red],
-	["FM PULSE MODE IS ON", Color.black, Color.green]
+	["PULSE MODE IS OFF", Color.black, Color.red],
+	["PULSE MODE IS ON", Color.black, Color.green]
 ])
 .action_( {
 	arg butt;
 	if( ~fmPulseState == 0,
 		{
 			// TURN ON
-			~fmPulseState = 1;
+			~pulseState = 1;
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
-			~getAndSendPhasePulse.();
+			~setAndTurnPulseOn.();
 		},
 		{
 			// TURN OFF
-			~fmPulseState = 0;
+			~pulseState = 0;
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
 			~turnPulseOff.();
 	});
-	["FM PULSE STATE:", ~fmPulseState].postln;
+	["PULSE STATE:", ~pulseState].postln;
 });
 
 ~fieldPlayState = 0;

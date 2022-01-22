@@ -14,20 +14,13 @@ addresses = [
 	'/synthHarmonics',
 	'/synthGain',
 	// phase pulse stuff
-	'/fmOn',
-	'/fmOff',
-	'/carrOn',
-	'/carrOff',
-	'/carrFreq',
-	'/carrHarmonics',
-	'/modOn',
-	'/modOff',
 	'/pulseOn',
 	'/pulseOff',
+	'/carrFreq',
+	'/carrHarmonics',
 	'/modFreq',
-	'/pulseFreq',
-	'/pulseWidth',
-	'/fmGain'
+	'/pulseGain'
+
 ];
 
 OSCdef.freeAll;

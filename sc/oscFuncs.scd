@@ -2,18 +2,19 @@
 // HOST SETUP
 // -----------------------------------------------------
 ~devMode = false;
-//~devMode = true;
+~devMode = true;
 (
 if( ~devMode == true,
 	{
 		// set up a local host on 8 different ports
 		var ports = Array.fill(8, { arg i; 10000 + i });
 		~localIP = "127.0.0.1";
+		//~localIP = "eagle2018.local";
 		~hosts = Array.fill(8, { arg i; NetAddr.new(~localIP, ports[i])});
 	},
 	{
 		// else, set up 8 pi hosts on the same port
-		var port=10002;
+		var port=10000;
 		~hostnames = [
 			"pione.local",
 			"pitwo.local",
@@ -69,7 +70,22 @@ Routine {
 }.play;
 )
 
+
+
+// MASTER PI AMP LEVELS
+~trLevels = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+~spkrLevels = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+
+
+~trLevels[0];
+~spkrLevels[0];
+
+~setLevels.(~trLevels, ~spkrLevels, 330.0);
+
 (
+// PI FUNCS
+
+// general use func
 ~setOneParam = {
 	// expects an array of 8 integers
 	arg synth=0, address='/carrFreq', vals=Array.fill(8, {440.0});
@@ -80,22 +96,24 @@ Routine {
 	});
 };
 
-~setSineMode = {
-	arg synth=0, gate=0; // 0 = set but don't turn on, 1 = set and turn on
+// SET AMP LEVELS ON EACH PI
+~setLevels = {
+	arg spkrs, trans, freq=220.0;
 	~hosts.do( {
-		arg host;
-		host.sendMsg( '/modFreq', synth, 0.0);
-		host.sendMsg( '/modOn', synth);
-		host.sendMsg( '/pulseWidth', synth, 1.0);
-		host.sendMsg( '/pulseOn', synth);
-		host.sendMsg( '/harmonics', synth, 1);
-		host.sendMsg( '/carrOn', synth);
-		if( gate == 1, { host.sendMsg( '/fmOn', synth) });
+		arg host, i;
+		// set freq
+		host.sendMsg( '/synthFreq', 0, freq);
+		host.sendMsg( '/synthFreq', 1, freq);
+		// set transducer level
+		host.sendMsg( '/synthGain', 0, ~trLevels[i]);
+		// set speaker level
+		host.sendMsg( '/synthGain', 1, ~spkrLevels[i]);
 	});
 };
 
+// FOR TERNARY MODE: SET ALL SINE FREQS AND TURN ON
 ~sendSines = {
-	arg freqs = Array.fill(8, { 440.0}), synthNums = Array.fill(8, { 0 }), numHarms = Array.fill(8, { 1 }), amps = Array.fill(8, { 1.0});
+	arg freqs = Array.fill(8, { 440.0}), synthNums = Array.fill(8, { 1 }), numHarms = Array.fill(8, { 1 }), amps = Array.fill(8, { 1.0});
 	// synthNum = 0 or 1 (transducer or spkr)
 	// all messages must have this order: address, synthNum, value
 	~hosts.do( {
@@ -107,6 +125,7 @@ Routine {
 	});
 };
 
+// TURN SINES OFF
 ~turnSinesOff = {
 	arg synthNums = Array.fill(8, { 0 });
 	~hosts.do( {
@@ -115,32 +134,33 @@ Routine {
 	});
 };
 
-~getAndSendPhasePulse = {
-	arg synthNums = Array.fill(8, {0}), numHarms = Array.fill(8, {1}), amps = Array.fill(8, {1.0});
+// FOR PULSE MODE: SET AND TURN ALL PULSE OSCS ON
+~setAndTurnPulseOn = {
+	arg synthNums = Array.fill(8, {1}), numHarms = Array.fill(8, {1}), amps = Array.fill(8, {1.0});
 	var freqs, pulseRate;
-	// synthNum = 0 or 1 (transducer or spkr)
+	// synthNum = 0 or 1 (transducer or spkr), default is 1 (speaker)
 	// all messages have this order: address, synthNum, value
-	freqs = ~getPhaseFreqs.();
+	freqs = ~getPulseFreqs.();
 	pulseRate = ~getPulseRate.();
 	~hosts.do( {
 		arg host, i;
-		host.sendMsg('/pulseFreq', synthNums[i], pulseRate); // set pulseRate
+		// set params
+		host.sendMsg('/modFreq', synthNums[i], pulseRate); // set pulseRate
 		host.sendMsg('/carrFreq', synthNums[i], freqs[i]); // set freq
 		host.sendMsg('/harmonics', synthNums[i], numHarms[i]); // set numHarms
-		host.sendMsg('/fmGain', synthNums[i], numHarms[i]); // set gain
-
-		// check to see if I need all of these?
-		host.sendMsg('/fmOn', synthNums[i]);
-		host.sendMsg('/modOn', synthNums[i]);
+		host.sendMsg('/pulseGain', synthNums[i], numHarms[i]); // set gain
+		// turn on
 		host.sendMsg('/pulseOn', synthNums[i]);
 	});
 };
 
+// TURN PULSE OSCS OFF
 ~turnPulseOff = {
 	arg synthNums = Array.fill(8, {0});
 	~hosts.do( {
 		arg host, i;
-		host.sendMsg( '/fmOff', synthNums[i]);
+		// turn off
+		host.sendMsg( '/pulseOff', synthNums[i]);
 	});
 };
 
@@ -150,27 +170,12 @@ Routine {
 // -----------------------------------------------------
 // EVENTS
 // -----------------------------------------------------
-~setOneParam.(0, '/harmonics', [1, 1, 1, 2, 1, 2, 1, 2]);
-~setOneParam.(0, '/carrFreq', Array.fill(8, { rrand(110.0, 330.0) }));
-~setOneParam.(0, '/carrFreq', Array.fill(8, { 440.0 }));
-~setOneParam.(0, '/modFreq', Array.fill(8, { 0.0 }));
-~setOneParam.(0, '/modOff');
-~setOneParam.(0, '/modOn');
-~setOneParam.(0, '/pulseFreq', Array.fill(8, {3.0}));
-~setOneParam.(0, '/pulseWidth', Array.fill(8, {0.25}));
-~setOneParam.(0, '/fmOff');
-~setOneParam.(0, '/fmOn');
-~setOneParam.(0, '/pulseOn');
-~setOneParam.(0, '/pulseOff');
-~setSineMode.(0, 1);
-~setSineMode.(1, 1);
-~setOneParam.(0, '/modFreq', Array.fill(8, { 120.0 }));
-~setOneParam.(0, '/fmGain', Array.fill(8, {1.0}));
+
 
 /*
 run:
 -stdSynth.ck for sustained tones
--fmSynth.ck for fm/pulsing tones
+-pulseSynth.ck for fm/pulsing tones
 
 make a mode with sensor mapped to modFreq
 

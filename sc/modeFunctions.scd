@@ -45,8 +45,8 @@
 	freqs;
 };
 
-// PHASE CANCELLATION MODE
-~getPhaseFreqs = {
+// PULSE MODE
+~getPulseFreqs = {
 	arg power=1.15;
 	var startFreqs, freqs, freqMin, freqMax;
 	startFreqs = Array.fill(4,
@@ -87,6 +87,6 @@
 )
 
 //
-r = ~getPhaseFreqs.();
+r = ~getPulseFreqs.();
 f = ~getPulseRate.();
 // BLUEPRINT

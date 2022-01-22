@@ -21,14 +21,15 @@ cassia channels:
 OscIn in;
 OscMsg msg;
 
-10033 => in.port;
+10000 => int port;
+port => in.port;
 in.listenAll();
 
 // -----------------------------------------------------------------------------
 // AUDIO
 // -----------------------------------------------------------------------------
 // synth defs
-me.dir() + "audio/interiors/" => string audioDir;
+me.dir() + "../audio/interiors/" => string audioDir;
 [
   "3rd_floor_center_hall.wav",
   "3rd_floor_N_hall.wav",
@@ -74,7 +75,7 @@ for( 0 => int i; i < numBufs; i++ ) {
 // -----------------------------------------------------------------------------
 // receiver function -> everything is triggered from this
 fun void oscListener() {
-  <<< "BUFFER SYNTHS LISTENING" >>>;
+  <<< "BUFFER SYNTHS LISTENING ON PORT:", port >>>;
   int bufNum;
   float gainFactor;
   while( true ) {
@@ -119,7 +120,7 @@ fun void bufPlayLoop( SndBuf buf, Envelope env, int loopIndex ) {
     0 => int sampCounter;
     // set env dur
     48 => int envDur;
-    envDur::samp => bufEnvs[0].duration;
+    envDur::samp => env.duration;
 
     while( bufLoops[loopIndex] ) {
         // start buff
@@ -136,5 +137,5 @@ fun void bufPlayLoop( SndBuf buf, Envelope env, int loopIndex ) {
 spork ~ oscListener();
 
 while( true ) {
-  1::samp => now;
+  1::second => now;
 }
