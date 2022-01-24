@@ -149,6 +149,7 @@ while( true ) {
     // check for update state on synth 1
     if( randFilterUpdates[0] && (second_i % eventInterval == 0) ) {
         Math.random2(0, 1) => eventTrigger;
+        <<< "EVENT TRIGGER:", eventTrigger >>>;
         if( eventTrigger ) {
             spork ~ bufChange(filters[0], bufEnvs[0]);
         }
@@ -156,6 +157,7 @@ while( true ) {
     // check for update state on synth 2
     if( randFilterUpdates[1] && (second_i % eventInterval == 0) ) {
         Math.random2(0, 1) => eventTrigger;
+        <<< "EVENT TRIGGER:", eventTrigger >>>;
         if( eventTrigger ) {
             spork ~ bufChange(filters[1], bufEnvs[1]);
         }
