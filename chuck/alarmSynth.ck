@@ -58,6 +58,7 @@ fun void oscListener() {
             // alarm on/off
             if( msg.address == "/alarmOn") {
                 1 => alarmState;
+                msg.getFloat(1) => env.target;
                 spork ~ pulse(saw, ramp, env, 440.0, 200.0, 2.0);
             }
             if( msg.address == "/alarmOff") 0 => alarmState;

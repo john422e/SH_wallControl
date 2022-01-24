@@ -40,8 +40,17 @@ if( ~devMode == true,
 );
 )
 
-
-
+(
+~setOneParam = {
+	// expects an array of 8 integers
+	arg synth=0, address='/carrFreq', vals=Array.fill(8, {440.0});
+	[address, vals].postln;
+	~hosts.do( {
+		arg host, i;
+		host.sendMsg( address, synth, vals[i]);
+	});
+};
+)
 // chuck sensor ctl with --caution-to-the-wind flag
 ~hosts[0].sendMsg( '/sensorInit'); // do first: start python program
 ~hosts[0].sendMsg( '/rebootSensor' );
@@ -68,6 +77,27 @@ if( ~devMode == true,
 ~hosts[0].sendMsg( '/synthHarmonics', 0, 1);
 ~hosts[0].sendMsg( '/synthHarmonics', 1, 1);
 ~hosts[0].sendMsg( '/synthFreq', 1, 440.0);
+
+
+~hosts[1].sendMsg( '/synthOn', 0);
+~hosts[1].sendMsg( '/synthOff', 0);
+
+
+
+~hosts[0].sendMsg( '/synthGain', 0, 0.0); // 0.99
+~hosts[1].sendMsg( '/synthGain', 0, 0.0); // 0.7
+~hosts[2].sendMsg( '/synthGain', 0, 0.0); // 0.65
+~hosts[3].sendMsg( '/synthGain', 0, 0.0); // 0.7
+~hosts[4].sendMsg( '/synthGain', 0, 0.0); // 0.8
+~hosts[5].sendMsg( '/synthGain', 0, 0.0); // 0.7
+~hosts[6].sendMsg( '/synthGain', 0, 0.0); // 0.6
+~hosts[7].sendMsg( '/synthGain', 0, 0.0); // 0.8
+
+
+~gains = [0];
+~setOneParam.( 0, '/alarmGain', Array.fill(8, { 0.0 }));
+~setOneParam.( 1, '/alarmGain', Array.fill(8, { 0.002 }));
+~hosts[7].sendMsg( '/alarmGain', 0, 0.00);
 
 rrand(-1.0, 1.0);
 
@@ -114,6 +144,7 @@ Routine {
 		host.sendMsg( address, synth, vals[i]);
 	});
 };
+)
 
 // SET AMP LEVELS ON EACH PI
 ~setLevels = {
@@ -218,10 +249,10 @@ Routine {
 
 // FOR ALARM MODE: GET WALLS AND TURN ON THOSE (2 or 3)
 ~turnAlarmOn = {
-	arg wallChoices;
+	arg wallChoices, gain=0.2;
 	wallChoices.do( {
 		arg wallNum;
-		~hosts[wallNum].sendMsg( '/alarmOn');
+		~hosts[wallNum].sendMsg( '/alarmOn', 1, gain);
 	});
 };
 
