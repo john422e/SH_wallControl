@@ -4,6 +4,12 @@ for SH@theWende, 2022 - john eagle
 */
 
 // -----------------------------------------------------------------------------
+// GLOBALS
+// -----------------------------------------------------------------------------
+0 => synthState;
+
+
+// -----------------------------------------------------------------------------
 // OSC
 // -----------------------------------------------------------------------------
 OscIn in;
@@ -38,8 +44,8 @@ fun void oscListener() {
       msg.getInt(0) => synth;
 
       // synth on/off
-      if( msg.address == "/synthOn") envs[synth].keyOn();
-      if( msg.address == "/synthOff") envs[synth].keyOff();
+      if( msg.address == "/synthOn") 1 => synthState;
+      if( msg.address == "/synthOff") 0 => synthState;
       // synth freq
       if( msg.address == "/synthFreq") msg.getFloat(1) => synths[synth].freq;
       // gain
@@ -51,13 +57,17 @@ fun void oscListener() {
 spork ~ oscListener();
 
 while( true ) {
-  envs[0].keyOn();
-  1::second => now;
-  envs[0].keyOff();
-  100::ms => now;
-  envs[1].keyOn();
-  1::second => now;
-  envs[1].keyOff();
-  2::second => now;
+    if( synthState ) {
+         
+        envs[0].keyOn();
+        1::second => now;
+        envs[0].keyOff();
+        100::ms => now;
+        envs[1].keyOn();
+        1::second => now;
+        envs[1].keyOff();
+        2::second => now;
+    }
+    1::second => now;
   
 }
