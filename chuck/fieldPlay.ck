@@ -14,6 +14,15 @@ cassia channels:
 
 
 
+// -----------------------------------------------------------------------------
+// GLOBALS
+// -----------------------------------------------------------------------------
+
+2 => int numSynths;
+[0, 0] @=> int randFilterUpdates[];
+0 => int second_i;
+2 => int eventInterval; // in seconds, CHANGE BACK TO 30! AFTER FINISHING SETTING
+int eventTrigger;
 
 // -----------------------------------------------------------------------------
 // OSC
@@ -29,50 +38,34 @@ in.listenAll();
 // AUDIO
 // -----------------------------------------------------------------------------
 // synth defs
-me.dir() + "../audio/interiors/" => string audioDir;
-[
-  "3rd_floor_center_hall.wav",
-  "3rd_floor_N_hall.wav",
-  "3rd_floor_N.wav",
-  "B27.wav",
-  "south_stairs_1.wav",
-  "south_stairs_2.wav",
-  "south_stairs_3.wav",
-  "south_stairs_B.wav"
-] @=> string filenames[];
-filenames.size() => int numBufs;
 
-SndBuf bufs[numBufs];
-Envelope bufEnvs[numBufs];
-Dyno comps[numBufs];
-BPF filters[numBufs];
-Mix2 bufMixes[numBufs];
-int bufLoops[numBufs];
-[8.0, 8.0, 8.0, 13.0, 4.0, 8.0, 8.0, 4.0] @=> float bufGains[];
+
+SndBuf bufs[numSynths];
+Envelope bufEnvs[numSynths];
+Dyno comps[numSynths];
+BPF filters[numSynths];
+Gain gains[numSynths];
 
 // sound chains
-for( 0 => int i; i < numBufs; i++ ) {
-  bufs[i] => bufEnvs[i] => comps[i] => filters[i] => bufMixes[i] => dac;
+for( 0 => int i; i < numSynths; i++ ) {
+  bufs[i] => bufEnvs[i] => comps[i] => filters[i] => gains[i] => dac.chan(i);
   // set filters
-  filters[i].set(500.0, 0.58);
+  filters[i].set(500.0, 0.58); // default filter settings (change freq?)
+  // set compressor settings
   comps[i].compress();
   0.05 => comps[i].thresh;
   20.0 => comps[i].ratio;
-  //0.5 => comps[i].slopeAbove;
-  bufGains[i] => comps[i].gain;
-  //8 => comps[i].gain;
-  comps[i].limit();
-  // read in buffer
-  audioDir + filenames[i] => bufs[i].read;
-  // set bufLoop to 0
-  0 => bufLoops[i];
-  // set compressor settings
-
 }
 
 // -----------------------------------------------------------------------------
 // FUNCTIONS
 // -----------------------------------------------------------------------------
+
+// readIn soundFile
+fun void readInFile( SndBuf buf, string fn ) {
+    (me.dir() + fn) => buf.read;
+};
+
 // receiver function -> everything is triggered from this
 fun void oscListener() {
   <<< "BUFFER SYNTHS LISTENING ON PORT:", port >>>;
@@ -84,35 +77,32 @@ fun void oscListener() {
       // all messages should have an address for event type
       // first arg should always be an int (0 or 1) specifying synth
       <<< msg.address >>>;
-      msg.getInt(0) => bufNum;
+      msg.getInt(0) => int synth;
+      
+      // buf init (read in file)
+      if( msg.address == "/bufRead") readInFile(bufs[synth], msg.getString(1));
 
       // bufs on/off
-      if( msg.address == "/bufOn") {
-          spork ~ bufPlayLoop( bufs[bufNum], bufEnvs[bufNum], bufNum);
-          1 => bufLoops[bufNum];
-      }
+      if( msg.address == "/bufOn") spork ~ bufPlayLoop( bufs[synth], bufEnvs[synth]); // start looping
       if( msg.address == "/bufOff") {
-          bufEnvs[bufNum].keyOff();
-          0 => bufLoops[bufNum];
+          0 => bufs[synth].loop;
+          bufEnvs[synth].keyOff();
       }
+      
+      // 
+      if( msg.address == "/randUpdates" ) msg.getInt(1) => randFilterUpdates[synth]; // 0 or 1
+
       // gain
-      if( msg.address == "/bufGain") {
-        msg.getFloat(1) => gainFactor;
-        <<< gainFactor * bufGains[bufNum], bufGains[bufNum] >>>;
-        (gainFactor * bufGains[bufNum]) => bufEnvs[bufNum].target;
-        bufEnvs[bufNum].keyOn();
-      }
-      // pan
-      if( msg.address == "/bufPan") msg.getFloat(1) => bufMixes[bufNum].pan;
+      if( msg.address == "/bufGain") msg.getFloat(1) => gains[synth].gain;
       // filter
-      if( msg.address == "/bufFilterFreq") msg.getFloat(1) => filters[bufNum].freq;
-      if( msg.address == "/bufFilterQ") msg.getFloat(1) => filters[bufNum].Q;
+      if( msg.address == "/bufFilterFreq") msg.getFloat(1) => filters[synth].freq;
+      if( msg.address == "/bufFilterQ") msg.getFloat(1) => filters[synth].Q;
     }
   }
 }
 
 // loops a sound buff with smooth envelope
-fun void bufPlayLoop( SndBuf buf, Envelope env, int loopIndex ) {
+fun void bufPlayLoop( SndBuf buf, Envelope env ) {
     // make sure buff will loop and starts at the beginning
     0 => buf.pos;
     1 => buf.loop;
@@ -122,20 +112,55 @@ fun void bufPlayLoop( SndBuf buf, Envelope env, int loopIndex ) {
     48 => int envDur;
     envDur::samp => env.duration;
 
-    while( bufLoops[loopIndex] ) {
+    while( buf.loop() ) {
         // start buff
         env.keyOn();
-        while( sampCounter < buf.samples() ) {
+        while( (sampCounter < buf.samples()) && buf.loop() ) {
             if( sampCounter == buf.samples() - envDur ) env.keyOff();
             sampCounter++;
             1::samp => now;
         }
         0 => sampCounter;
     }
+    // turn off when loop killed
+    env.keyOff();
 }
+
+// initiate random change in BPF
+fun void bufChange( BPF bpf, Envelope env ) {
+    <<< "CHANGING BPF STATE" >>>;
+    // turn off
+    env.keyOff();
+    50::ms => now;
+    // make sure Q is at a high value
+    10.0 => bpf.Q;
+    // pick random freq for BPF
+    Math.random2f(100, 2000.0) => bpf.freq;
+    // turn back on
+    env.keyOn();
+    50::ms => now;
+}
+
+
 
 spork ~ oscListener();
 
 while( true ) {
-  1::second => now;
+    // check for update state on synth 1
+    if( randFilterUpdates[0] && (second_i % eventInterval == 0) ) {
+        Math.random2(0, 1) => eventTrigger;
+        if( eventTrigger ) {
+            spork ~ bufChange(filters[0], bufEnvs[0]);
+        }
+    }
+    // check for update state on synth 2
+    if( randFilterUpdates[1] && (second_i % eventInterval == 0) ) {
+        Math.random2(0, 1) => eventTrigger;
+        if( eventTrigger ) {
+            spork ~ bufChange(filters[1], bufEnvs[1]);
+        }
+    }
+    // advance time
+    second_i++;
+    1::second => now;
 }

@@ -1,8 +1,18 @@
 // -----------------------------------------------------
 // HOST SETUP
 // -----------------------------------------------------
+
+
+
+// EVALUATE ONE OF THESE FIRST
 ~devMode = false;
 ~devMode = true;
+
+
+
+
+
+// THEN RUN THIS BLOCK
 (
 if( ~devMode == true,
 	{
@@ -32,11 +42,20 @@ if( ~devMode == true,
 
 
 
-
+// chuck sensor ctl with --caution-to-the-wind flag
 ~hosts[0].sendMsg( '/sensorInit'); // do first: start python program
-~hosts[0].sendMsg( '/sensorClose'); // do last: close python and chuck programs
+~hosts[0].sendMsg( '/rebootSensor' );
+~hosts[0].sendMsg( '/sensorClose'); // do last: close python and chuck programs, make them all match "/endProgram"
+~hosts[0].sendMsg( '/endProgram');
 ~hosts[0].sendMsg( '/sensorOn'); // start pinging
 ~hosts[0].sendMsg( '/sensorOff'); // stop pinging
+
+
+~hosts[0].sendMsg( '/stdSynthState', 0); // turn synth off/on
+~hosts[0].sendMsg( '/stdSynthState', 1); // turn synth off/on
+~hosts[0].sendMsg( '/alarmOn');
+~hosts[0].sendMsg( '/alarmOff');
+
 
 // -----------------------------------------------------
 // FUNCTIONS
@@ -156,7 +175,7 @@ Routine {
 
 // TURN PULSE OSCS OFF
 ~turnPulseOff = {
-	arg synthNums = Array.fill(8, {0});
+	arg synthNums = Array.fill(8, {1}); // default to speaker (synth 1)
 	~hosts.do( {
 		arg host, i;
 		// turn off
@@ -164,8 +183,60 @@ Routine {
 	});
 };
 
+// FOR FIELDPLAY MODE: INIT FILES, TURN ON, AND START RANDOM BPF UPDATING
+~turnFieldPlayOn = {
+	arg fns, synthNums = Array.fill(8, {1}); // 8 sound file names, default to speaker (synth 1)
+	~hosts.do( {
+		arg host, i;
+		// init
+		host.sendMsg('/bufRead', synthNums[i], fns[i]);
+		// turn on
+		host.sendMsg('/bufOn', synthNums[i]);
+	});
+};
+
+~setFieldPlayRandUpdates = {
+	arg update=true, synthNums = Array.fill(8, {1}); // default to on (1) and speaker ( synth1 1)
+	var updates;
+	if( update == true, { updates=Array.fill(8, {1})}, { updates=Array.fill(8, {0})});
+	~hosts.do( {
+		arg host, i;
+		// set
+		host.sendMsg('/randUpdates', synthNums[i], updates[i]);
+	});
+};
+
+// TURN FIELDPLAY MODE OFF
+~turnFieldPlayOff = {
+	arg synthNums = Array.fill(8, {1}); // default to speaker (synth 1)
+	~hosts.do( {
+		arg host, i;
+		// turn off
+		host.sendMsg( '/bufOff', synthNums[i]);
+	});
+};
+
+// FOR ALARM MODE: GET WALLS AND TURN ON THOSE (2 or 3)
+~turnAlarmOn = {
+	arg wallChoices;
+	wallChoices.do( {
+		arg wallNum;
+		~hosts[wallNum].sendMsg( '/alarmOn');
+	});
+};
+
+// TURN ALARM OFF
+~turnAlarmOff = {
+	arg wallChoices;
+	wallChoices.do( {
+		arg wallNum;
+		~hosts[wallNum].sendMsg( '/alarmOff');
+	});
+}
+
 )
 
+~turnAlarmOff.([0, 1, 2, 3, 4, 5, 6, 7]);
 
 // -----------------------------------------------------
 // EVENTS

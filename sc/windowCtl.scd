@@ -1,6 +1,6 @@
 (
 var wWidth=1000, wHeight=800, title="SOUND HOUSE";
-var ternaryStateButton, pulseStateButton, fieldPlayStateButton, feedbackStateButton;
+var ternaryStateButton, pulseStateButton, fieldPlayStateButton, feedbackStateButton, alarmStateButton;
 
 //-----------------------------------------------------------------------------------
 // BUILD WINDOW
@@ -112,5 +112,28 @@ feedbackStateButton = Button(w, 170@30)
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
 	});
 	["FEEDBACK STATE:", ~feedbackState].postln;
+});
+
+~alarmState = 0;
+alarmStateButton = Button(w, 170@30)
+.states_([
+	["ALARM MODE IS OFF", Color.black, Color.red],
+	["ALARM MODE IS ON", Color.black, Color.green]
+])
+.action_( {
+	var numAlarms = rrand(2, 3);
+	if( ~alarmState == 0,
+		{
+			// TURN ON
+			~alarmState = 1;
+			~wallAlarms = ~getAlarmWalls.(numAlarms); // ~wallAlarms needs to be global to be turned off later
+			~wallAlarms.postln;
+			~turnAlarmOn.(~wallAlarms);
+		},
+		{
+			// TURN OFF
+			~alarmState = 0;
+			~turnAlarmOff.(~wallAlarms);
+	});
 });
 )

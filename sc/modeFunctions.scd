@@ -84,9 +84,66 @@
 	// return pulse rate
 	pulseRate;
 };
+
+// BLUEPRINT
+
+// FIELDPLAY
+
+~sfFiles = [
+	[
+		"../audio/desertNight/1.wav",
+		"../audio/desertNight/2.wav",
+		"../audio/desertNight/3.wav",
+		"../audio/desertNight/4.wav"
+	],
+	[
+		"../audio/desertQuiet/1.wav",
+		"../audio/desertQuiet/2.wav"
+	],
+	[
+		"../audio/desertTraffic/1.wav",
+		"../audio/desertTraffic/2.wav",
+		"../audio/desertTraffic/3.wav",
+		"../audio/desertTraffic/4.wav"
+	],
+	[
+		"../audio/interiors/1.wav",
+		"../audio/interiors/2.wav",
+		"../audio/interiors/3.wav",
+		"../audio/interiors/4.wav",
+		"../audio/interiors/5.wav",
+		"../audio/interiors/6.wav",
+		"../audio/interiors/7.wav"
+	]
+];
+// need to be able to randomly select soundfile (by categories?),
+
+~getSoundFiles = {
+	// picks one sub array from ~sfFiles and fills an array with 8 filenames, wrapping as necessary
+	arg category=~sfFiles.choose;
+	var fns;
+	fns = Array.fill(8, {
+		arg i;
+		category.wrapAt(i);
+	});
+	fns.postln;
+};
+
+~getAlarmWalls = {
+	arg numAlarms=2;
+	var choices, walls=Array.fill(8, { arg i; i });
+	choices = Array.fill(numAlarms, {
+		var choice;
+		choice = walls.choose;
+		walls.remove(choice);
+		choice;
+	});
+
+};
 )
 
-//
-r = ~getPulseFreqs.();
-f = ~getPulseRate.();
-// BLUEPRINT
+
+// this all works, but need to add button, and change the gain for rand updates
+~turnFieldPlayOn.(~getSoundFiles.());
+~setFieldPlayRandUpdates.();
+~turnFieldPlayOff.();

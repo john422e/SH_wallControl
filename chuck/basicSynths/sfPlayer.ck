@@ -50,7 +50,7 @@ fun void bufPlayLoop( SndBuf buf, Envelope env ) {
     env.keyOff();
 }
 
-fun void bufChange( SndBuf buf, Envelope env, string files[] ) {
+fun void bufChange( SndBuf buf, BPF bpf, Envelope env, string files[] ) {
     <<< "CHANGING BPF STATE" >>>;
     // turn off
     env.keyOff();
@@ -98,7 +98,7 @@ while( true ) {
     
     if( second_i % eventInterval == 0 ) {
         Math.random2(0, 1) => eventTrigger;
-        if( eventTrigger ) spork ~ bufChange(buf, env, sfs);
+        if( eventTrigger ) spork ~ bufChange(buf, bpf, env, sfs);
     }
     
     second_i++;
