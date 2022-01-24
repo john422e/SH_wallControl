@@ -54,10 +54,7 @@ fun void oscListener() {
       // mod freq
       if( msg.address == "/modFreq") msg.getFloat(1) => mods[synth].freq;
       // gain
-      if( msg.address == "/pulseGain") {
-        msg.getFloat(1) => envs[synth].target;
-        envs[synth].keyOn();
-      }
+      if( msg.address == "/pulseGain") msg.getFloat(1) => envs[synth].target;
     }
   }
 }
