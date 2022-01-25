@@ -175,13 +175,13 @@ fun void oscListener() {
                     //normalize(dist, thresh+distSmoother, distOffset) * qScaler => filters[synth].Q;
                     normalize(dist, thresh+distSmoother, distOffset) * ampScaler => amp;
                     <<< "FIELD AMP", amp >>>;
-                    amp => bufEnvs[synth].target;
-                    spork ~ bufEnvs[synth].keyOn();
+                    amp => gains[synth].gain; // PROBABLY NEED TO SMOOTH THIS
+                    //spork ~ gains[synth].keyOn();
                 }
                 else { // go to min amp val
                     //10.0 => filters[synth].Q;
-                    minAmp => bufEnvs[synth].target;
-                    spork ~ bufEnvs[synth].keyOn();
+                    minAmp => gains[synth].gains;
+                    //spork ~ bufEnvs[synth].keyOn();
                 }
             }
         }
