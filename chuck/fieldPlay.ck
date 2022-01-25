@@ -86,20 +86,21 @@ fun void oscListener() {
       // bufs on/off
       if( msg.address == "/bufOn") spork ~ bufPlayLoop( bufs[synth], bufEnvs[synth]); // start looping
       if( msg.address == "/bufOff") {
+          <<< "BUFF OFF" >>>;
           0 => bufs[synth].loop;
           bufEnvs[synth].keyOff();
       }
       
       // 
       if( msg.address == "/randUpdates" ) {
+          <<< "RAND UPDATES ON", synth >>>;
           // address, synth, hostnum(0-7), state (0 or 1)
           // set state
           msg.getInt(1) => randFilterUpdates[synth]; // 0 or 1
           msg.getInt(2) => seed;
           Math.srandom(seed);
           // do a change right away
-          spork ~ bufChange(filters[0], bufEnvs[0]);
-          spork ~ bufChange(filters[1], bufEnvs[1]);
+          spork ~ bufChange(filters[synth], bufEnvs[synth]);
       }
 
       // gain
