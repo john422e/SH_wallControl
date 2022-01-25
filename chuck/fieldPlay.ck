@@ -98,7 +98,7 @@ fun void oscListener() {
           //msg.getInt(1) => seed;
           //Math.srandom(seed) => 
           msg.getInt(1) => randFilterUpdates[synth]; // 0 or 1
-          
+      }
 
       // gain
       if( msg.address == "/bufGain") msg.getFloat(1) => gains[synth].gain;
