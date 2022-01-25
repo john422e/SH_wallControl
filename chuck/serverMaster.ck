@@ -1,3 +1,4 @@
+<<< "ADDING ALL SYNTHS TO SERVER" >>>;
 me.dir() => string dir;
 
 
