@@ -22,7 +22,7 @@ cassia channels:
 int seed;
 [0, 0] @=> int randFilterUpdates[];
 0 => int second_i;
-3 => int eventInterval; // in seconds, CHANGE BACK TO 30! AFTER FINISHING SETTING
+20 => int eventInterval; // in seconds, CHANGE BACK TO 30! AFTER FINISHING SETTING
 int eventTrigger;
 
 // -----------------------------------------------------------------------------
