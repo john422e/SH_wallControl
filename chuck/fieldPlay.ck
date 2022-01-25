@@ -97,6 +97,9 @@ fun void oscListener() {
           msg.getInt(1) => randFilterUpdates[synth]; // 0 or 1
           msg.getInt(2) => seed;
           Math.srandom(seed);
+          // do a change right away
+          spork ~ bufChange(filters[0], bufEnvs[0]);
+          spork ~ bufChange(filters[1], bufEnvs[1]);
       }
 
       // gain
