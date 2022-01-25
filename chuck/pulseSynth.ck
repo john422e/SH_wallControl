@@ -4,6 +4,11 @@ for SH@theWende, 2022 - john eagle
 */
 
 // -----------------------------------------------------------------------------
+// GLOBALS
+// -----------------------------------------------------------------------------
+1 => int running;
+
+// -----------------------------------------------------------------------------
 // OSC
 // -----------------------------------------------------------------------------
 OscIn in;
@@ -55,12 +60,17 @@ fun void oscListener() {
       if( msg.address == "/modFreq") msg.getFloat(1) => mods[synth].freq;
       // gain
       if( msg.address == "/pulseGain") msg.getFloat(1) => envs[synth].target;
+      
+      // end program
+      if( msg.address == "/endProgram" ) 0 => running;
     }
   }
 }
 
 spork ~ oscListener();
 
-while( true ) {
-    1::day => now;
+while( running ) {
+    1::samp => now;
 }
+
+<<< "pulseSynth.ck stopping" >>>;

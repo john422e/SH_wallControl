@@ -18,6 +18,7 @@ cassia channels:
 // GLOBALS
 // -----------------------------------------------------------------------------
 
+1 => int running;
 2 => int numSynths;
 int seed;
 [0, 0] @=> int randFilterUpdates[];
@@ -109,6 +110,9 @@ fun void oscListener() {
       // filter
       if( msg.address == "/bufFilterFreq") msg.getFloat(1) => filters[synth].freq;
       if( msg.address == "/bufFilterQ") msg.getFloat(1) => filters[synth].Q;
+      
+      // end program
+      if( msg.address == "/endProgram") 0 => running;
     }
   }
 }
@@ -157,7 +161,7 @@ fun void bufChange( BPF bpf, Envelope env ) {
 
 spork ~ oscListener();
 
-while( true ) {
+while( running ) {
     // check for update state on synth 1
     if( randFilterUpdates[0] && (second_i % eventInterval == 0) ) {
         Math.random2(0, 1) => eventTrigger;
@@ -178,3 +182,4 @@ while( true ) {
     second_i++;
     1::second => now;
 }
+<<< "fieldPlay.ck stopping" >>>;

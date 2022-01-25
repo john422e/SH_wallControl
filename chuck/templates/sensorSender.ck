@@ -81,7 +81,7 @@ fun void oscListener() {
                 Std.system(command);
             }
             if( msg.address == "/rebootSensor" ) rebootSensor();
-            if( msg.address == "/sensorClose") {
+            if( msg.address == "/endProgram") {
                 // shutds down sensor program
                 <<< "SHUTTING DOWN SENSOR" >>>;
                 sensorShutdown();

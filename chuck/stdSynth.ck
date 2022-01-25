@@ -41,7 +41,7 @@ Envelope synthEnvs[numSynths];
 for( 0 => int i; i < numSynths; i++ ) {
     // default to sine tone
     1 => synths[i].harmonics;
-    0.05 => synthEnvs[i].time; // TESTING
+    //0.05 => synthEnvs[i].time; // TESTING
     synths[i] => synthEnvs[i] => dac.chan(i);
 }
 
@@ -83,6 +83,12 @@ fun void oscListener() {
       if( msg.address == "/stdSynthState" ) {
           msg.getInt(0) => synthState;
           <<< "STD SYNTH STATE:", synthState >>>;
+          if( synthState == 1 ) {
+              // set to minAmp and turn on
+              minAmp => synthEnvs[synth].target;
+              synthEnvs[synth].keyOn();
+          }
+          else synthEnvs[synth].keyOff();
       }
       if( synthState ) {
           // all messages should have an address for event type
@@ -104,7 +110,7 @@ fun void oscListener() {
               synthEnvs[synth].keyOn();
           }
           // end program
-          if( msg.address == "/sensorClose" ) 0 => running;
+          if( msg.address == "/endProgram" ) 0 => running;
           
           // get sensor data
           if( msg.address == "/distance" ) {
