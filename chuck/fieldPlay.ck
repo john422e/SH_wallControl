@@ -181,7 +181,7 @@ fun void oscListener() {
                 }
                 else { // go to min amp val
                     //10.0 => filters[synth].Q;
-                    minAmp => gains[synth].gains;
+                    minAmp => gains[synth].gain;
                     //spork ~ bufEnvs[synth].keyOn();
                 }
             }
