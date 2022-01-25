@@ -93,14 +93,15 @@ fun void oscListener() {
       
       // 
       if( msg.address == "/randUpdates" ) {
-          <<< "RAND UPDATES ON", synth >>>;
+          
           // address, synth, hostnum(0-7), state (0 or 1)
           // set state
           msg.getInt(1) => randFilterUpdates[synth]; // 0 or 1
+          <<< "RAND UPDATES SET:", synth, randFilterUpdates[synth] >>>;
           msg.getInt(2) => seed;
           Math.srandom(seed);
-          // do a change right away
-          spork ~ bufChange(filters[synth], bufEnvs[synth]);
+          // if 1, do a change right away
+          if( randFilterUpdates[synth] == 1) spork ~ bufChange(filters[synth], bufEnvs[synth]);
       }
 
       // gain
