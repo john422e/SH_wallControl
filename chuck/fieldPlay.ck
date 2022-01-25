@@ -37,7 +37,7 @@ float qVal;
 
 
 // set these
-5.0 => float ampScaler;
+10.0 => float ampScaler;
 20.0 => float qScaler;
 
 30 => int distSmoother;
