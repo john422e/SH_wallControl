@@ -19,6 +19,8 @@ cassia channels:
 // -----------------------------------------------------------------------------
 
 2 => int numSynths;
+Math.random() => int seed;
+Math.srandom(seed); // set random seed
 [0, 0] @=> int randFilterUpdates[];
 0 => int second_i;
 20 => int eventInterval; // in seconds, CHANGE BACK TO 30! AFTER FINISHING SETTING
@@ -90,7 +92,13 @@ fun void oscListener() {
       }
       
       // 
-      if( msg.address == "/randUpdates" ) msg.getInt(1) => randFilterUpdates[synth]; // 0 or 1
+      if( msg.address == "/randUpdates" ) {
+          // address, synth, hostnum(0-7), state (0 or 1)
+          // set state
+          //msg.getInt(1) => seed;
+          //Math.srandom(seed) => 
+          msg.getInt(1) => randFilterUpdates[synth]; // 0 or 1
+          
 
       // gain
       if( msg.address == "/bufGain") msg.getFloat(1) => gains[synth].gain;
