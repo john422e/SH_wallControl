@@ -179,7 +179,7 @@ fun void oscListener() {
                     amp => gains[synth].gain; // PROBABLY NEED TO SMOOTH THIS
                     amp => filters[synth].gain;
                     amp => bufEnvs[synth].target;
-                    spork ~ gains[synth].keyOn();
+                    spork ~ bufEnvs[synth].keyOn();
                 }
                 else { // go to min amp val
                     //10.0 => filters[synth].Q;
