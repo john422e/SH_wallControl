@@ -81,7 +81,8 @@ fun void oscListener() {
     while( in.recv(msg) ) {
       // global synth state, arg = 0 or 1 for on/off
       if( msg.address == "/stdSynthState" ) {
-          msg.getInt(0) => synthState;
+          msg.getInt(0) => synth;
+          msg.getInt(1) => synthState;
           <<< "STD SYNTH STATE:", synthState >>>;
           if( synthState == 1 ) {
               // set to minAmp and turn on
