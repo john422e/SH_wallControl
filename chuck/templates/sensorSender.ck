@@ -48,7 +48,7 @@ fun void sensorShutdown() {
 
 fun void rebootSensor() {
     // kill python processes first
-    Std.system("lsof -t -c Python | xargs kill -9");
+    //Std.system("lsof -t -c Python | xargs kill -9");
     1::second => now;
     // now start up sensor program again
     me.dir() + "../../python/" + sensorProgram => string targetFile;
@@ -73,7 +73,7 @@ fun void oscListener() {
             // will need a var for sensorState
             if( msg.address == "/sensorInit") {
                 // turns sensor program on
-                Std.system("lsof -t -i:5000 | xargs kill -9"); // do i need sudo on these commands?
+                Std.system("ss dst :5000 | xargs kill -9"); // do i need sudo on these commands?
                 <<< "TURNING SENSOR ON" >>>;
                 
                 me.dir() + "../../python/" + sensorProgram => string targetFile;
@@ -85,8 +85,8 @@ fun void oscListener() {
                 // shutds down sensor program
                 <<< "SHUTTING DOWN SENSOR" >>>;
                 sensorShutdown();
-                Std.system("lsof -t -i:5000 | xargs kill -9"); // do i need sudo on these commands?
-                Std.system("lsof -t -c Python | xargs kill -9");
+                Std.system("ss dst :5000 | xargs kill -9"); // do i need sudo on these commands?
+                //Std.system("lsof -t -c Python | xargs kill -9");
                 0 => running;
                 //Std.system("lsof -t -i:10000 | xargs kill -9"); // this will kill this process too
             

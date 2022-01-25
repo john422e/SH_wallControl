@@ -4,7 +4,7 @@ me.dir() => string dir;
 
 <<< "STARTING SENSOR CONTROL" >>>;
 // sensor control
-//Machine.add(dir + "templates/sensorSender.ck");
+Machine.add(dir + "templates/sensorSender.ck");
 
 <<< "STARTING STD SYNTH" >>>;
 // ternary code
