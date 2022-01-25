@@ -23,7 +23,7 @@ Machine.add(dir + "alarmSynth.ck");
 // fieldplay mode
 Machine.add(dir + "fieldPlay.ck");
 
-//1::day => now;
+1::second => now;
 
 
 // need to:
