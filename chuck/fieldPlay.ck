@@ -28,7 +28,7 @@ int seed;
 20 => int eventInterval; // in seconds, CHANGE BACK TO 30! AFTER FINISHING SETTING
 int eventTrigger;
 // sensor vars
-150.0 => float thresh;
+300.0 => float thresh;
 10.0 => float distOffset;
 float dist;
 float amp;
@@ -171,14 +171,15 @@ fun void oscListener() {
                 <<< "/distance", dist >>>;
                 // turn on sound if value below thresh
                 if( dist < thresh && dist > 0.0 ) {
-                    normalize(dist, thresh+distSmoother, distOffset) * qScaler => filters[synth].Q;
+                    
+                    //normalize(dist, thresh+distSmoother, distOffset) * qScaler => filters[synth].Q;
                     normalize(dist, thresh+distSmoother, distOffset) * ampScaler => amp;
-                    <<< "sensorAmp", amp >>>;
+                    <<< "FIELD AMP", amp >>>;
                     amp => bufEnvs[synth].target;
                     spork ~ bufEnvs[synth].keyOn();
                 }
                 else { // go to min amp val
-                    10.0 => filters[synth].Q;
+                    //10.0 => filters[synth].Q;
                     minAmp => bufEnvs[synth].target;
                     spork ~ bufEnvs[synth].keyOn();
                 }
