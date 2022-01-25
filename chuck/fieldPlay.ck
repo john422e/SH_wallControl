@@ -126,6 +126,7 @@ fun void oscListener() {
             msg.getInt(1) => synthState;
             <<< "BUFF SYNTH STATE:", synthState >>>;
             if( synthState == 1 ) {
+                <<< "BUFF SYNTH ON" >>>;
                 // set to minAmp and turn on
                 minAmp => bufEnvs[synth].target;
                 bufEnvs[synth].keyOn();
