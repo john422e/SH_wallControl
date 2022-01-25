@@ -59,7 +59,8 @@ def get_reading():
 
 def send_reading(reading):
     packet = osc_message_builder.OscMessageBuilder(address="/distance")
-
+    # synth num
+    packet.add_arg(1, arg_type='i')
     # adds distance reading to the OSC message
     packet.add_arg(reading, arg_type='f')
 
