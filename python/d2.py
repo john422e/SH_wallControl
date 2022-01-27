@@ -36,7 +36,7 @@ def sendDistance():
 
 def shutdown():
     global running
-    print("SHUTTING SENSOR DOWN")
+    print("d2.py SHUTTING SENSOR DOWN")
     running = False
 
 # start the system
@@ -55,13 +55,12 @@ osc_udp_client(localIP, sendPort, "SENDER CLIENT")
 
 # loop and listen
 while running:
-    print(pingState)
     osc_process()
     # only fetch distance and send when pingState == 1
     if pingState == 1:
         sendDistance()
     time.sleep(pingInterval)
 
-print("EXITING")
+print("d2.py EXITING")
 # properly close the system
 osc_terminate()

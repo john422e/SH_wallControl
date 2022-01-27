@@ -5,6 +5,7 @@ sensorSender.ck
 
 // run this if python3 still open (debugging)
 Std.system("pkill python3");
+1::second => now;
 
 // -----------------------------------------------------------------------------
 // GLOBALS
@@ -103,7 +104,7 @@ fun void oscListener() {
             if( msg.address == "/sensorOff") setPinging(0);
 
             // distance data
-            if( msg.address == "/distance") <<< "sensorSender.ck", msg.getFloat(1) >>>; // uncomment this only for testing
+            //if( msg.address == "/distance") <<< "sensorSender.ck", msg.getFloat(1) >>>; // uncomment this only for testing
         }
     }
 }
@@ -111,7 +112,7 @@ fun void oscListener() {
 spork ~ oscListener();
 
 while( running ) {
-    1::samp => now;
+    1::second => now;
 }
 
 <<< "sensorSender.ck stopping" >>>;
