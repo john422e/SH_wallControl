@@ -20,10 +20,9 @@ pingInterval = 0.25 # in seconds
 pingState = 0
 
 def setPing(newPingState):
+    global pingState
     # sets ping state to 0 or 1
     print("d2.py PING STATE:", newPingState)
-
-    global pingStates
     pingState = newPingState
 
 def sendDistance():
@@ -36,6 +35,7 @@ def sendDistance():
     osc_send(msg, "SENDER CLIENT")
 
 def shutdown(self):
+    global running
     print("SHUTTING SENSOR DOWN")
     running = False
 
