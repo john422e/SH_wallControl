@@ -83,6 +83,7 @@ fun void endProgram() {
     // shutds down sensor program
     sensorShutdown();
     0 => running;
+}
 
 fun void oscListener() {
     <<< "sensorSender.ck SENSOR CTL LISTENING ON PORT", IN_PORT >>>;

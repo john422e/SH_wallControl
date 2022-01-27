@@ -70,7 +70,7 @@ fun float normalize( float inVal, float x1, float x2 ) {
 
 fun void setSynthState( int synthNum ) {
     msg.getInt(1) => synthStates[synth];
-    <<< "stdSynth.ck STD SYNTH STATES:", synthStates() >>>;
+    <<< "stdSynth.ck STD SYNTH STATES:", synthStates[0], synthStates[1] >>>;
     if( synthStates[synth] == 1) {
         // set to minAmp and turn on
         minAmp => synthEnvs[synth].target;
