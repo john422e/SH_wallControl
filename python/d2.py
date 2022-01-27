@@ -34,7 +34,7 @@ def sendDistance():
     msg = oscbuildparse.OSCMessage("/distance", None, [dummyDistance])
     osc_send(msg, "SENDER CLIENT")
 
-def shutdown(self):
+def shutdown():
     global running
     print("SHUTTING SENSOR DOWN")
     running = False
@@ -59,7 +59,7 @@ while running:
     osc_process()
     # only fetch distance and send when pingState == 1
     if pingState == 1:
-        sendDistance(i)
+        sendDistance()
     time.sleep(pingInterval)
 
 print("EXITING")
