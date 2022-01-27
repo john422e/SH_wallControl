@@ -10,6 +10,7 @@ for SH@theWende, 2022 - john eagle
 // -----------------------------------------------------------------------------
 1 => int running;
 int synth;
+0.2 => float minAmp; // for sound level when NOT boosted with sensor
 
 // -----------------------------------------------------------------------------
 // OSC
@@ -90,7 +91,7 @@ fun void setAmpFromDistance(float dist) {
     150.0 => float thresh;
     10.0 => float distOffset; // can set for each sensor if irregularities too much
     float amp;
-    0.2 => float minAmp; // for sound level when NOT boosted with sensor
+    
     30 => int distSmoother; // val to feed normalize because minAmp is > 0
     
     // turn on sound if value below thresh

@@ -92,7 +92,7 @@ fun void oscListener() {
         while( in.recv(msg)) {
             // addresses coming through are either /sensorOn, /sensorOff,
             // or /distance followed by a float arg
-            <<< "sensorSender.ck", msg.address >>>;
+            //<<< "sensorSender.ck", msg.address >>>;
             
             // sensor on/off
             if( msg.address == "/sensorInit") sensorInit();
