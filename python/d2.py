@@ -54,7 +54,7 @@ print("d2.py SERVING ON PORT", rcvPort)
 osc_udp_client(localIP, sendPort, "SENDER CLIENT")
 
 # loop and listen
-while not finished:
+while running:
     osc_process()
     # only fetch distance and send when pingState == 1
     if pingState == 1:
