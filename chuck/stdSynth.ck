@@ -38,7 +38,6 @@ for( 0 => int i; i < numSynths; i++ ) {
     0 => synthStates[i];
     // default to sine tone
     1 => synths[i].harmonics;
-    //0.05 => synthEnvs[i].time; // TESTING
     synths[i] => synthEnvs[i] => dac.chan(i);
 }
 
@@ -86,13 +85,14 @@ fun void setSynthGain( float amp, int synthNum ) {
 }
 
 fun void setAmpFromDistance(float dist) {
-    <<< "stdSynth.ck /distance", dist >>>;
+    //<<< "stdSynth.ck /distance", dist >>>;
     // sensor vars
     150.0 => float thresh;
     10.0 => float distOffset; // can set for each sensor if irregularities too much
     float amp;
     
     30 => int distSmoother; // val to feed normalize because minAmp is > 0
+    
     
     // turn on sound if value below thresh
     if( dist < thresh && dist > 0.0 ) {
@@ -102,12 +102,19 @@ fun void setAmpFromDistance(float dist) {
         for( 0 => int i; i < numSynths; i++ ) {
             if( synthStates[i] == 1 ) {
                 amp => synthEnvs[i].target;
-                spork ~ synthEnvs[synth].keyOn();
+                spork ~ synthEnvs[i].keyOn();
             }
-            else { // go to min amp val
+            else synthEnvs[i].keyOff(); // turn off
+        }
+    }
+    else { // go to min amp val
+        for( 0 => int i; i < numSynths; i++ ) {
+            if( synthStates[i] == 1 ) {
+                <<< "SYNTH", i, "IS ON" >>>;
                 minAmp => synthEnvs[i].target;
                 spork ~ synthEnvs[i].keyOn();
             }
+            else synthEnvs[i].keyOff();
         }
     }
 }
@@ -126,12 +133,15 @@ fun void oscListener() {
   while( true ) {
     in => now; // wait for a message
     while( in.recv(msg) ) {
-        
+        //<<< "stdSynth.ck", msg.address >>>;
         // for every address but /distance, the first arg will be an int for the right synth number 
         msg.getInt(0) => synth;
         
         // global synth state, arg = 0 or 1 for on/off
         if( msg.address == "/stdSynthState" ) setSynthState(synth, msg.getInt(1));
+        
+        // end program
+        if( msg.address == "/endProgram" ) endProgram();
         
         // ONLY CHECK IF SYNTH STATE IS ON
         if( synthStates[0] == 1 || synthStates[1] == 1 ) {
@@ -147,8 +157,6 @@ fun void oscListener() {
             if( msg.address == "/synthHarmonics") msg.getInt(1) => synths[synth].harmonics;
             // gain
             if( msg.address == "/synthGain") setSynthGain(msg.getFloat(1), synth);
-            // end program
-            if( msg.address == "/endProgram" ) endProgram();
             // get sensor data
             if( msg.address == "/distance" ) setAmpFromDistance(msg.getFloat(0)); 
         }

@@ -14,7 +14,8 @@ for SH@theWende, 2022 - john eagle
 OscIn in;
 OscMsg msg;
 
-10000 => in.port;
+10000 => int port;
+port => in.port;
 in.listenAll();
 
 // -----------------------------------------------------------------------------
@@ -40,7 +41,7 @@ for( 0 => int i; i < numSynths; i++ ) {
 // RECEIVER FUNC
 // -----------------------------------------------------------------------------
 fun void oscListener() {
-  <<< "pulseSynth.ck PULSE SYNTHS LISTENING ON PORT:", in.port() >>>;
+  <<< "pulseSynth.ck PULSE SYNTHS LISTENING ON PORT:", port >>>;
   int synth;
   while( true ) {
     in => now; // wait for a message

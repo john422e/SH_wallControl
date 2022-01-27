@@ -34,7 +34,7 @@ MIDIdef.cc( \ternaryCtl, {
 			);
 			if( (num == sendCtl) && (val>0),
 				{
-					var synthNum = 1, gain=0.5; // change this if needed
+					var synthNum = 1, gain=0.2; // change this if needed
 					// compute freqs and send
 					~ternaryFreqs = ~setFreqsFromChain.(~chain, ~primePair);
 					~ternaryFreqs.postln;

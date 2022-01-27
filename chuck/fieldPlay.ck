@@ -98,7 +98,7 @@ fun void readInFile( SndBuf buf, string fn ) {
 
 fun void setSynthState( int synthNum, int state ) {
     state => synthStates[synthNum];
-    <<< "fieldPlay.ck STD SYNTH STATES:", synthStates[0], synthStates[1] >>>;
+    <<< "fieldPlay.ck BUF SYNTH STATES:", synthStates[0], synthStates[1] >>>;
     if( synthStates[synthNum] == 1) {
         // set to minAmp and turn on
         minAmp => bufEnvs[synthNum].target;
@@ -176,6 +176,9 @@ fun void oscListener() {
         // global synth state, arg = 0 or 1 for on/off
         if( msg.address == "/bufSynthState" ) setSynthState(synth, msg.getInt(1));
         
+        // end program
+        if( msg.address == "/endProgram" ) endProgram();
+        
         // ONLY CHECK IF SYNTH STATE IS ON
         if( synthStates[0] == 1 || synthStates[1] == 1 ) { 
             // all messages should have an address for event type
@@ -198,12 +201,9 @@ fun void oscListener() {
             // filter
             if( msg.address == "/bufFilterFreq") msg.getFloat(1) => filters[synth].freq;
             if( msg.address == "/bufFilterQ") msg.getFloat(1) => filters[synth].Q;
-            
-            // end program
-            if( msg.address == "/endProgram" ) endProgram();
-            
+
             // get sensor data
-            if( msg.address == "/distance" ) setValsFromDistance(msg.getFloat(1));
+            if( msg.address == "/distance" ) setValsFromDistance(msg.getFloat(0));
         }
     }
   }
