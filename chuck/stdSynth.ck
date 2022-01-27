@@ -10,15 +10,6 @@ for SH@theWende, 2022 - john eagle
 // -----------------------------------------------------------------------------
 1 => int running;
 int synth;
-// sensor vars
-150.0 => float thresh;
-10.0 => float distOffset; // can set for each sensor if irregularities too much
-float dist;
-float amp;
-0.2 => float minAmp; // for sound level when NOT boosted with sensor
-30 => int distSmoother; // val to feed normalize because minAmp is > 0
-
-//0 => distSmoother; // TROUBLESHOOTING
 
 // -----------------------------------------------------------------------------
 // OSC
@@ -77,6 +68,56 @@ fun float normalize( float inVal, float x1, float x2 ) {
     return outVal;
 }
 
+fun void setSynthState( int synthNum ) {
+    msg.getInt(1) => synthStates[synth];
+    <<< "stdSynth.ck STD SYNTH STATES:", synthStates() >>>;
+    if( synthStates[synth] == 1) {
+        // set to minAmp and turn on
+        minAmp => synthEnvs[synth].target;
+        synthEnvs[synth].keyOn();
+    }
+    else synthEnvs[synth].keyOff();
+}
+
+fun void setSynthGain( float amp, int synthNum ) {
+    amp => synthEnvs[synthNum].target;
+    synthEnvs[synthNum].keyOn();
+}
+
+fun void setAmpFromDistance(float dist) {
+    <<< "stdSynth.ck /distance", dist >>>;
+    // sensor vars
+    150.0 => float thresh;
+    10.0 => float distOffset; // can set for each sensor if irregularities too much
+    float amp;
+    0.2 => float minAmp; // for sound level when NOT boosted with sensor
+    30 => int distSmoother; // val to feed normalize because minAmp is > 0
+    
+    // turn on sound if value below thresh
+    if( dist < thresh && dist > 0.0 ) {
+        normalize(dist, thresh+distSmoother, distOffset) => amp;
+        <<< "stdSynth.ck sensorAmp", amp >>>;
+        // no synthNum comes in here, so have to check manually
+        for( 0 => int i; i < numSynths; i++ ) {
+            if( synthStates[i] == 1 ) {
+                amp => synthEnvs[i].target;
+                spork ~ synthEnvs[synth].keyOn();
+            }
+            else { // go to min amp val
+                minAmp => synthEnvs[i].target;
+                spork ~ synthEnvs[i].keyOn();
+            }
+        }
+    }
+}
+
+fun void endProgram() {
+    <<< "stdSynth.ck END PROGRAM" >>>;
+    // ends loop and stops program
+    0 => running;
+}
+    
+
 // receiver func
 fun void oscListener() {
   <<< "stdSynth.ck SYNTHS LISTENING ON PORT:", IN_PORT >>>;
@@ -85,24 +126,16 @@ fun void oscListener() {
     in => now; // wait for a message
     while( in.recv(msg) ) {
         
-        msg.getInt(0) => synth; // try if msg.getInt(0) ?
-        <<< msg.getInt(0), msg.getFloat(0) >>>;
+        // for every address but /distance, the first arg will be an int for the right synth number 
+        msg.getInt(0) => synth;
         
         // global synth state, arg = 0 or 1 for on/off
-        if( msg.address == "/stdSynthState" ) {
-            msg.getInt(1) => synthStates[synth];
-            <<< "stdSynth.ck STD SYNTH STATES:", synthStates >>>;
-            if( synthStates[synth] == 1) {
-                // set to minAmp and turn on
-                minAmp => synthEnvs[synth].target;
-                synthEnvs[synth].keyOn();
-            }
-            else synthEnvs[synth].keyOff();
-        }
+        if( msg.address == "/stdSynthState" ) setSynthState(synth);
+        
         if( synthStates[0] == 1 || synthStates[1] == 1 ) {
             // all messages should have an address for event type
-            // first arg should always be an int (0 or 1) specifying synth
-            //<<< msg.address >>>;
+            // first arg should always be an int (0 or 1) specifying synth, except for /distance
+            //<<< "stdSynth.ck", msg.address >>>;
             
             // individual synth on/off
             if( msg.address == "/synthOn") synthEnvs[synth].keyOn();
@@ -111,32 +144,11 @@ fun void oscListener() {
             if( msg.address == "/synthFreq") msg.getFloat(1) => synths[synth].freq;
             if( msg.address == "/synthHarmonics") msg.getInt(1) => synths[synth].harmonics;
             // gain
-            if( msg.address == "/synthGain") {
-                msg.getFloat(1) => synthEnvs[synth].target;
-                synthEnvs[synth].keyOn();
-            }
+            if( msg.address == "/synthGain") setSynthGain(msg.getFloat(1), synth);
             // end program
-            if( msg.address == "/endProgram" ) 0 => running;
-            
+            if( msg.address == "/endProgram" ) endProgram();
             // get sensor data
-            if( msg.address == "/distance" ) {
-                msg.getFloat(1) => dist;
-                <<< "stdSynth.ck /distance", dist >>>;
-                // turn on sound if value below thresh
-                if( dist < thresh && dist > 0.0 ) {
-                    normalize(dist, thresh+distSmoother, distOffset) => amp;
-                    <<< "stdSynth.ck sensorAmp", amp >>>;
-                    // no synthNum comes in here, so have to check manually
-                    if( synthStates[0] == 1 || synthStates[1] == 1 ) {
-                        amp => synthEnvs[synth].target;
-                        spork ~ synthEnvs[synth].keyOn();
-                    }
-                }
-                else { // go to min amp val
-                    minAmp => synthEnvs[synth].target;
-                    spork ~ synthEnvs[synth].keyOn();
-                }
-            }
+            if( msg.address == "/distance" ) setAmpFromDistance(msg.getFloat(0)); 
         }
     }
 }
@@ -149,6 +161,6 @@ fun void oscListener() {
 spork ~ oscListener();
 
 while( running ) {
-    1::samp => now;
+    1::second => now;
 }
 <<< "stdSynth.ck stopping" >>>;

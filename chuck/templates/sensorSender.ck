@@ -68,6 +68,7 @@ fun void sensorShutdown() {
 fun void rebootSensor() {
     // reboot in the case of an error
     // kill python processes first
+    <<< "sensorSender.ck HARD REBOOT SENSOR" >>>;
     Std.system("pkill python3");
     1::second => now;
     // now start up sensor program again
@@ -75,7 +76,13 @@ fun void rebootSensor() {
     "python3 " + targetFile + " &" => string command;
     Std.system(command);
 }
-    
+
+fun void endProgram() {
+    <<< "sensorSender.ck END PROGRAM" >>>;
+    // ends loop and stops program
+    // shutds down sensor program
+    sensorShutdown();
+    0 => running;
 
 fun void oscListener() {
     <<< "sensorSender.ck SENSOR CTL LISTENING ON PORT", IN_PORT >>>;
@@ -87,16 +94,14 @@ fun void oscListener() {
             <<< "sensorSender.ck", msg.address >>>;
             
             // sensor on/off
-            // will need a var for sensorState
             if( msg.address == "/sensorInit") sensorInit();
             
+            // hard reboot (emergencies only)
             if( msg.address == "/rebootSensor" ) rebootSensor();
-           
-            if( msg.address == "/endProgram") {
-                // shutds down sensor program
-                sensorShutdown();
-                0 => running;
-            }
+            
+            // shutdown sensor and chuck
+            if( msg.address == "/endProgram") endProgram();
+            
             // start pinging sensor program
             if( msg.address == "/sensorOn") setPinging(1);
 
