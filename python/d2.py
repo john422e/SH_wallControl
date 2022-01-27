@@ -26,7 +26,7 @@ def setPing(newPingState):
     global pingStates
     pingState = newPingState
 
-def sendDistance():
+def sendDistance(self):
     # sends distance to proper synthNum
     dummyDistance = randrange(0.0, 300.0)
     dummyDistance = float(dummyDistance)
@@ -35,7 +35,7 @@ def sendDistance():
     msg = oscbuildparse.OSCMessage("/distance", None, [dummyDistance])
     osc_send(msg, "SENDER CLIENT")
 
-def shutdown():
+def shutdown(self):
     print("SHUTTING SENSOR DOWN")
     running = False
 
