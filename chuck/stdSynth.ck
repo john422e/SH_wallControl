@@ -9,7 +9,7 @@ for SH@theWende, 2022 - john eagle
 // GLOBALS
 // -----------------------------------------------------------------------------
 1 => int running;
-
+int synth;
 // sensor vars
 150.0 => float thresh;
 10.0 => float distOffset; // can set for each sensor if irregularities too much
@@ -91,7 +91,7 @@ fun void oscListener() {
         // global synth state, arg = 0 or 1 for on/off
         if( msg.address == "/stdSynthState" ) {
             msg.getInt(1) => synthStates[synth];
-            <<< "stdSynth.ck STD SYNTH STATE:", synthState >>>;
+            <<< "stdSynth.ck STD SYNTH STATES:", synthStates >>>;
             if( synthStates[synth] == 1) {
                 // set to minAmp and turn on
                 minAmp => synthEnvs[synth].target;
@@ -139,6 +139,7 @@ fun void oscListener() {
             }
         }
     }
+}
 }
 
 // -----------------------------------------------------------------------------
