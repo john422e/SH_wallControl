@@ -31,7 +31,7 @@ def sendDistance():
     dummyDistance = randrange(0.0, 300.0)
     dummyDistance = float(dummyDistance)
     # build message
-    print(dummyDistance)
+    print("d2.py distance:", dummyDistance)
     msg = oscbuildparse.OSCMessage("/distance", None, [dummyDistance])
     osc_send(msg, "SENDER CLIENT")
 
@@ -55,6 +55,7 @@ osc_udp_client(localIP, sendPort, "SENDER CLIENT")
 
 # loop and listen
 while running:
+    print(pingState)
     osc_process()
     # only fetch distance and send when pingState == 1
     if pingState == 1:
