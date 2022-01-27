@@ -34,6 +34,15 @@ in.listenAll(); // start listener
 // -----------------------------------------------------------------------------
 // FUNCTIONS
 // -----------------------------------------------------------------------------
+
+fun void sensorInit() {
+    // turns sensor program on
+    <<< "sensorSender.ck TURNING SENSOR ON" >>>;
+    me.dir() + "../../python/" + sensorProgram => string targetFile;
+    "python3 " + targetFile + " &" => string command;
+    Std.system(command);
+}
+
 fun void setPinging(int synthNum, int pingState) {
     // set pingState to 0 or 1, let python deal with interval
     <<< "sensorSender.ck PINGING:", pingState >>>;
@@ -78,16 +87,7 @@ fun void oscListener() {
             
             // sensor on/off
             // will need a var for sensorState
-            if( msg.address == "/sensorInit") {
-                // turns sensor program on
-                //Std.system("pkill python3");
-                
-                <<< "sensorSender.ck TURNING SENSOR ON" >>>;
-                
-                me.dir() + "../../python/" + sensorProgram => string targetFile;
-                "python3 " + targetFile + " &" => string command;
-                Std.system(command);
-            }
+            if( msg.address == "/sensorInit") sensorInit();
             
             if( msg.address == "/rebootSensor" ) rebootSensor();
            

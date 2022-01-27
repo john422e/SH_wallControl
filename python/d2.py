@@ -21,12 +21,12 @@ pingState = 0
 
 def setPing(newPingState):
     # sets ping state to 0 or 1
-    print("PYTHON: PING!")
+    print("d2.py PING STATE:", newPingState)
 
     global pingStates
     pingState = newPingState
 
-def sendDistance(self):
+def sendDistance():
     # sends distance to proper synthNum
     dummyDistance = randrange(0.0, 300.0)
     dummyDistance = float(dummyDistance)
