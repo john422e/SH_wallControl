@@ -3,6 +3,8 @@ sensorSender.ck
 --john eagle, jan 2022
 */
 
+// run this if python3 still open (debugging)
+Std.system("pkill python3");
 
 // -----------------------------------------------------------------------------
 // GLOBALS
@@ -26,7 +28,8 @@ OscIn in;
 OscMsg msg;
 
 out.dest(localIP, OUT_PORT);
-"/w" => string pingAddress;
+"/setPing" => string pingAddress;
+"/shutdown" => string shutdownAddress;
 
 IN_PORT => in.port;
 in.listenAll(); // start listener
@@ -43,14 +46,12 @@ fun void sensorInit() {
     Std.system(command);
 }
 
-fun void setPinging(int synthNum, int pingState) {
+fun void setPinging(int pingState) {
     // set pingState to 0 or 1, let python deal with interval
     <<< "sensorSender.ck PINGING:", pingState >>>;
     out.dest(localIP, OUT_PORT);
     out.start(pingAddress);
-    synthNum => out.add; // 0 or 1 for synth
     pingState => out.add; // 0 or 1 for state
-    
     out.send();
 }
 
@@ -58,7 +59,7 @@ fun void sensorShutdown() {
     // send shutdown message so sensor program can properly shutdown
     <<< "sensorSender.ck SHUTTING DOWN SENSOR" >>>;
     out.dest(localIP, OUT_PORT);
-    out.start("/shutdown");
+    out.start(shutdownAddress);
     out.send();
     1::second => now;
 }
@@ -77,7 +78,6 @@ fun void rebootSensor() {
 
 fun void oscListener() {
     <<< "sensorSender.ck SENSOR CTL LISTENING ON PORT", IN_PORT >>>;
-    int synth;
     while( true ) {
         in => now; // wait for a message
         while( in.recv(msg)) {
@@ -97,10 +97,10 @@ fun void oscListener() {
                 0 => running;
             }
             // start pinging sensor program
-            if( msg.address == "/sensorOn") setPinging(synth, 1);
+            if( msg.address == "/sensorOn") setPinging(1);
 
             // stop pinging sensor program
-            if( msg.address == "/sensorOff") setPinging(synth, 0);
+            if( msg.address == "/sensorOff") setPinging(0);
 
             // distance data
             if( msg.address == "/distance") <<< "sensorSender.ck", msg.getFloat(1) >>>; // uncomment this only for testing
