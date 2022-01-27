@@ -69,15 +69,15 @@ fun float normalize( float inVal, float x1, float x2 ) {
     return outVal;
 }
 
-fun void setSynthState( int synthNum ) {
-    msg.getInt(1) => synthStates[synth];
+fun void setSynthState( int synthNum, int state ) {
+    state => synthStates[synthNum];
     <<< "stdSynth.ck STD SYNTH STATES:", synthStates[0], synthStates[1] >>>;
-    if( synthStates[synth] == 1) {
+    if( synthStates[synthNum] == 1) {
         // set to minAmp and turn on
-        minAmp => synthEnvs[synth].target;
-        synthEnvs[synth].keyOn();
+        minAmp => synthEnvs[synthNum].target;
+        synthEnvs[synthNum].keyOn();
     }
-    else synthEnvs[synth].keyOff();
+    else synthEnvs[synthNum].keyOff();
 }
 
 fun void setSynthGain( float amp, int synthNum ) {
@@ -131,8 +131,9 @@ fun void oscListener() {
         msg.getInt(0) => synth;
         
         // global synth state, arg = 0 or 1 for on/off
-        if( msg.address == "/stdSynthState" ) setSynthState(synth);
+        if( msg.address == "/stdSynthState" ) setSynthState(synth, msg.getInt(1));
         
+        // ONLY CHECK IF SYNTH STATE IS ON
         if( synthStates[0] == 1 || synthStates[1] == 1 ) {
             // all messages should have an address for event type
             // first arg should always be an int (0 or 1) specifying synth, except for /distance

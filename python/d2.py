@@ -30,7 +30,7 @@ def sendDistance():
     dummyDistance = randrange(0.0, 300.0)
     dummyDistance = float(dummyDistance)
     # build message
-    print("d2.py distance:", dummyDistance)
+    #print("d2.py distance:", dummyDistance)
     msg = oscbuildparse.OSCMessage("/distance", None, [dummyDistance])
     osc_send(msg, "SENDER CLIENT")
 

@@ -40,14 +40,14 @@ for( 0 => int i; i < numSynths; i++ ) {
 // RECEIVER FUNC
 // -----------------------------------------------------------------------------
 fun void oscListener() {
-  <<< "SYNTHS LISTENING" >>>;
+  <<< "pulseSynth.ck PULSE SYNTHS LISTENING ON PORT:", in.port() >>>;
   int synth;
   while( true ) {
     in => now; // wait for a message
     while( in.recv(msg)) {
       // all messages should have an address for event type
       // first arg should always be an int (0 or 1) specifying synth
-      <<< msg.address >>>;
+      //<<< "pulseSynth.ck", msg.address >>>;
       msg.getInt(0) => synth;
 
       // carrOscs on/off
@@ -70,7 +70,7 @@ fun void oscListener() {
 spork ~ oscListener();
 
 while( running ) {
-    1::samp => now;
+    1::second => now;
 }
 
 <<< "pulseSynth.ck stopping" >>>;

@@ -1,4 +1,5 @@
 /*
+fieldPlay.ck
 for SH@theWende, 2022 - john eagle
 2 synths (chan 1, 2) on each pi
 */
@@ -19,28 +20,15 @@ cassia channels:
 // -----------------------------------------------------------------------------
 
 1 => int running;
-0 => int synthState;
-2 => int numSynths;
 int synth;
-int seed;
-[0, 0] @=> int randFilterUpdates[];
-0 => int second_i;
-20 => int eventInterval; // in seconds, CHANGE BACK TO 30! AFTER FINISHING SETTING
-int eventTrigger;
-// sensor vars
-300.0 => float thresh;
-10.0 => float distOffset;
-float dist;
-float amp;
-float qVal;
 0.2 => float minAmp;
 
+// time/event tracking
+0 => int second_i;
+20 => int eventInterval; // in seconds
+[0, 0] @=> int randFilterUpdates[];
+int eventTrigger;
 
-// set these
-20.0 => float ampScaler;
-20.0 => float qScaler;
-
-30 => int distSmoother;
 
 // -----------------------------------------------------------------------------
 // OSC
@@ -56,7 +44,8 @@ in.listenAll();
 // AUDIO
 // -----------------------------------------------------------------------------
 // synth defs
-
+2 => int numSynths;
+int synthStates[numSynths]; // set to 0 when not using, 1 turns on
 
 SndBuf bufs[numSynths];
 Envelope bufEnvs[numSynths];
@@ -107,88 +96,114 @@ fun void readInFile( SndBuf buf, string fn ) {
     (me.dir() + fn) => buf.read;
 };
 
+fun void setSynthState( int synthNum, int state ) {
+    state => synthStates[synthNum];
+    <<< "fieldPlay.ck STD SYNTH STATES:", synthStates[0], synthStates[1] >>>;
+    if( synthStates[synthNum] == 1) {
+        // set to minAmp and turn on
+        minAmp => bufEnvs[synthNum].target;
+        bufEnvs[synthNum].keyOn();
+    }
+    else bufEnvs[synthNum].keyOff();
+}
+
+fun void setRandUpdates(int synthNum, int randState, int seed) {
+    randState => randFilterUpdates[synthNum]; // 0 or 1
+    <<< "fieldPlay.ck RAND UPDATES SET:", synthNum, randFilterUpdates[synthNum] >>>;
+    Math.srandom(seed); // set seed based on pi num
+    // if 1, do a change right away
+    
+    // TRYING WITHOUT THIS, REENABLE IF TOO WEIRD
+    
+    //if( randFilterUpdates[synthNum] == 1) spork ~ bufChange(filters[synthNum], bufEnvs[synthNum]);
+}
+
+fun void setValsFromDistance(float dist) {
+    <<< "fieldPlay.ck /distance", dist >>>;
+    // sensor vars
+    300.0 => float thresh;
+    10.0 => float distOffset;
+    float amp;
+    float qVal;
+    
+    30 => int distSmoother; // val to feed normalize because minAmp is > 0
+
+    // set these
+    20.0 => float ampScaler;
+    20.0 => float qScaler;
+
+        
+    // turn on sound if value below thresh
+    if( dist < thresh && dist > 0.0 ) {
+        normalize(dist, thresh+distSmoother, distOffset) * ampScaler => amp;
+        <<< "fieldPlay.ck sensorAmp", amp >>>;
+        // no synthNum comes in here, so have to check manually
+        for( 0 => int i; i < numSynths; i++ ) {
+            if( synthStates[i] == 1 ) {
+                amp => gains[synth].gain; // PROBABLY NEED TO SMOOTH THIS
+                //amp => filters[synth].gain;
+                amp => bufEnvs[synth].target;
+                spork ~ bufEnvs[synth].keyOn();
+            }
+            else { // go to min amp val
+                //10.0 => filters[synth].Q;
+                minAmp => gains[synth].gain;
+                //minAmp => filters[synth].gain;
+                minAmp => bufEnvs[synth].target;
+                spork ~ bufEnvs[synth].keyOn();
+            }
+        }
+    }
+}
+
+fun void endProgram() {
+    <<< "fieldPlay.ck END PROGRAM" >>>;
+    // ends loop and stops program
+    0 => running;
+}
+
 // receiver function -> everything is triggered from this
 fun void oscListener() {
-  <<< "BUFFER SYNTHS LISTENING ON PORT:", port >>>;
-  int bufNum;
-  float gainFactor;
+  <<< "fieldPlay.ck BUFFER SYNTHS LISTENING ON PORT:", port >>>;
+  
   while( true ) {
     in => now; // wait for a message
     while( in.recv(msg)) {
         
-        // end program
-        if( msg.address == "/endProgram") 0 => running;
+        // for every address but /distance, the first arg will be an int for the right synth number 
+        msg.getInt(0) => synth;
         
-        if( msg.address == "/bufSynthState" ) {
-            
-            // global synth state, arg = 0 or 1 for on/off
-            msg.getInt(0) => synth;
-            msg.getInt(1) => synthState;
-            <<< "BUFF SYNTH STATE:", synthState >>>;
-            if( synthState == 1 ) {
-                <<< "BUFF SYNTH ON" >>>;
-                // set to minAmp and turn on
-                minAmp => bufEnvs[synth].target;
-                bufEnvs[synth].keyOn();
-            }
-            else bufEnvs[synth].keyOff();
-        }
-        // only check for everything else if synthState is 1
-        if( synthState ) {
-            
+        // global synth state, arg = 0 or 1 for on/off
+        if( msg.address == "/bufSynthState" ) setSynthState(synth, msg.getInt(1));
+        
+        // ONLY CHECK IF SYNTH STATE IS ON
+        if( synthStates[0] == 1 || synthStates[1] == 1 ) { 
             // all messages should have an address for event type
             // first arg should always be an int (0 or 1) specifying synth
-            <<< msg.address >>>;
-            msg.getInt(0) => synth;
+            //<<< "fieldPlay.ck", msg.address >>>;
             
             // buf init (read in file)
             if( msg.address == "/bufRead") readInFile(bufs[synth], msg.getString(1));
             
             // bufs on/off
             if( msg.address == "/bufOn") spork ~ bufPlayLoop( bufs[synth], bufEnvs[synth]); // start looping
-            if( msg.address == "/bufOff") {
-                <<< "BUFF OFF" >>>;
-                0 => bufs[synth].loop;
-                bufEnvs[synth].keyOff();
-            }
-            if( msg.address == "/randUpdates" ) {
-                // address, synth, hostnum(0-7), state (0 or 1)
-                // set state
-                msg.getInt(1) => randFilterUpdates[synth]; // 0 or 1
-                <<< "RAND UPDATES SET:", synth, randFilterUpdates[synth] >>>;
-                msg.getInt(2) => seed;
-                Math.srandom(seed);
-                // if 1, do a change right away
-                if( randFilterUpdates[synth] == 1) spork ~ bufChange(filters[synth], bufEnvs[synth]);
-            }
+            if( msg.address == "/bufOff") 0 => bufs[synth].loop;
+            
+            // set randUpdates on/off
+            if( msg.address == "/randUpdates" ) setRandUpdates(synth, msg.getInt(1), msg.getInt(2));
+
             // gain
             if( msg.address == "/bufGain") msg.getFloat(1) => gains[synth].gain;
+            
             // filter
             if( msg.address == "/bufFilterFreq") msg.getFloat(1) => filters[synth].freq;
             if( msg.address == "/bufFilterQ") msg.getFloat(1) => filters[synth].Q;
+            
+            // end program
+            if( msg.address == "/endProgram" ) endProgram();
+            
             // get sensor data
-            if( msg.address == "/distance" ) {
-                msg.getFloat(1) => dist;
-                <<< "/distance", dist >>>;
-                // turn on sound if value below thresh
-                if( dist < thresh && dist > 0.0 ) {
-                    
-                    //normalize(dist, thresh+distSmoother, distOffset) * qScaler => filters[synth].Q;
-                    normalize(dist, thresh+distSmoother, distOffset) * ampScaler => amp;
-                    <<< "FIELD AMP", amp >>>;
-                    amp => gains[synth].gain; // PROBABLY NEED TO SMOOTH THIS
-                    //amp => filters[synth].gain;
-                    amp => bufEnvs[synth].target;
-                    spork ~ bufEnvs[synth].keyOn();
-                }
-                else { // go to min amp val
-                    //10.0 => filters[synth].Q;
-                    minAmp => gains[synth].gain;
-                    //minAmp => filters[synth].gain;
-                    minAmp => bufEnvs[synth].target;
-                    spork ~ bufEnvs[synth].keyOn();
-                }
-            }
+            if( msg.address == "/distance" ) setValsFromDistance(msg.getFloat(1));
         }
     }
   }
@@ -221,7 +236,7 @@ fun void bufPlayLoop( SndBuf buf, Envelope env ) {
 
 // initiate random change in BPF
 fun void bufChange( BPF bpf, Envelope env ) {
-    <<< "CHANGING BPF STATE" >>>;
+    <<< "fieldPlay.ck CHANGING BPF STATE" >>>;
     // turn off
     env.keyOff();
     50::ms => now;
@@ -234,7 +249,9 @@ fun void bufChange( BPF bpf, Envelope env ) {
     50::ms => now;
 }
 
-
+// -----------------------------------------------------------------------------
+// MAIN LOOP
+// -----------------------------------------------------------------------------
 
 spork ~ oscListener();
 
@@ -242,7 +259,7 @@ while( running ) {
     // check for update state on synth 1
     if( randFilterUpdates[0] && (second_i % eventInterval == 0) ) {
         Math.random2(0, 1) => eventTrigger;
-        <<< "EVENT TRIGGER:", eventTrigger >>>;
+        <<< "fieldPlay.ck 0 EVENT TRIGGER:", eventTrigger >>>;
         if( eventTrigger ) {
             spork ~ bufChange(filters[0], bufEnvs[0]);
         }
@@ -250,7 +267,7 @@ while( running ) {
     // check for update state on synth 2
     if( randFilterUpdates[1] && (second_i % eventInterval == 0) ) {
         Math.random2(0, 1) => eventTrigger;
-        <<< "EVENT TRIGGER:", eventTrigger >>>;
+        <<< "fieldPlay.ck 1 EVENT TRIGGER:", eventTrigger >>>;
         if( eventTrigger ) {
             spork ~ bufChange(filters[1], bufEnvs[1]);
         }

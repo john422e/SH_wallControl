@@ -1,4 +1,5 @@
 /*
+alarmSynth.ck
 for SH@theWende, 2022 - john eagle
 1 synths (chan 2) on each pi
 */
@@ -50,7 +51,7 @@ fun void pulse(SawOsc s, Phasor p, Envelope e, float freq, float index, float pu
 
 // receiver func
 fun void oscListener() {
-    <<< "ALARM LISTENING ON PORT:", IN_PORT >>>;
+    <<< "alarmSynth.ck ALARM LISTENING ON PORT:", IN_PORT >>>;
     int synth;
     while( running ) {
         in => now; // wait for a message
@@ -78,7 +79,7 @@ fun void oscListener() {
 spork ~ oscListener();
 
 while( running ) {
-    1::samp => now;
+    1::second => now;
 }
 
 // turn everything off

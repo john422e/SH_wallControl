@@ -27,13 +27,13 @@ if( ~devMode == true,
 		var port=10000;
 		~hostnames = [
 			"pione.local",
-			"pitwo.local",
-			"pithree.local",
-			"pifour.local",
-			"pifive.local",
-			"pisix.local",
-			"piseven.local",
-			"pieight.local"
+			//"pitwo.local",
+			//"pithree.local",
+			//"pifour.local",
+			//"pifive.local",
+			//"pisix.local",
+			//"piseven.local",
+			//"pieight.local"
 		];
 		~hosts = Array.fill( 8, { arg i; NetAddr.new( ~hostnames[i], port )});
 	}
