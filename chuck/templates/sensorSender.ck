@@ -17,7 +17,7 @@ Std.system("pkill python3");
 // -----------------------------------------------------------------------------
 
 // local address
-"eagle2018.local" => string localIP;
+"127.0.0.1" => string localIP;
 
 // ports
 5000 => int OUT_PORT;
