@@ -110,7 +110,6 @@ fun void setAmpFromDistance(float dist) {
     else { // go to min amp val
         for( 0 => int i; i < numSynths; i++ ) {
             if( synthStates[i] == 1 ) {
-                <<< "SYNTH", i, "IS ON" >>>;
                 minAmp => synthEnvs[i].target;
                 spork ~ synthEnvs[i].keyOn();
             }
