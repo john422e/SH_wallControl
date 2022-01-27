@@ -85,7 +85,27 @@
 	pulseRate;
 };
 
-// BLUEPRINT
+// PITCH ROOM/BLUEPRINT
+~getRoomPitches = {
+	var minFreq=110.0, maxFreq=500.0;
+	var lowFreq = rrand(minFreq, maxFreq);
+	var minInterval=1.04, maxInterval=1.2;
+	var freqs=Array.new(8), intervals;
+
+	// make seven random intervals
+	intervals = 7.collect( { rrand(minInterval, maxInterval) });
+	freqs.add(lowFreq).postln;
+	// fill a freq list from starting freq building up one interval at a time
+	intervals.do( {
+		arg interval, i;
+		var newFreq;
+		newFreq = freqs[i] * interval;
+		freqs.add(newFreq);
+	});
+	//["RANGE:", freqs[7]/freqs[0]].postln;
+	freqs = freqs.scramble;
+	freqs;
+};
 
 // FIELDPLAY
 
@@ -119,14 +139,26 @@
 // need to be able to randomly select soundfile (by categories?),
 
 ~getSoundFiles = {
+	arg space="exteriors";
+	var listCopy, category, fns;
 	// picks one sub array from ~sfFiles and fills an array with 8 filenames, wrapping as necessary
-	arg category=~sfFiles.choose;
-	var fns;
+	if( space == "exteriors",
+		{
+			// choose only exteriors
+			listCopy = ~sfFiles.copyRange(0, ~sfFiles.size-1);
+			listCopy.removeAt(listCopy.size-1);
+			category = listCopy.choose;
+		},
+		{
+			// else it's interiors (grab the last batch only)
+			category = ~sfFiles[~sfFiles.size-1];
+	});
 	fns = Array.fill(8, {
 		arg i;
 		category.wrapAt(i);
 	});
-	fns.postln;
+	["FILES", fns].postln;
+	fns;
 };
 
 ~getAlarmWalls = {
@@ -143,7 +175,3 @@
 )
 
 
-// this all works, but need to add button, and change the gain for rand updates
-~turnFieldPlayOn.(~getSoundFiles.());
-~setFieldPlayRandUpdates.();
-~turnFieldPlayOff.();

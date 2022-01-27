@@ -1,12 +1,12 @@
 (
-var wWidth=1000, wHeight=800, title="SOUND HOUSE";
+var wWidth=1200, wHeight=50, title="SOUND HOUSE";
 var ternaryStateButton, pulseStateButton, fieldPlayStateButton, feedbackStateButton, alarmStateButton;
 
 //-----------------------------------------------------------------------------------
 // BUILD WINDOW
 //-----------------------------------------------------------------------------------
 Window.closeAll;
-w = Window(title, Rect(0, 200, wWidth, wHeight))
+w = Window(title, Rect(0, 0, wWidth, wHeight))
 .front
 .alwaysOnTop_(true);
 w.onClose_( {
@@ -18,7 +18,32 @@ w.view.decorator_(FlowLayout(w.bounds, 10@10, 10@10));
 // STATE BUTTONS
 //-----------------------------------------------------------------------------------
 
-// set a global binary var for each mode
+// 1. PULSE MODE
+~pulseState = 0; // set a global binary var for each mode
+pulseStateButton = Button(w, 170@30)
+.states_([
+	["PULSE MODE IS OFF", Color.black, Color.red],
+	["PULSE MODE IS ON", Color.black, Color.green]
+])
+.action_( {
+	arg butt;
+	if( ~pulseState == 0,
+		{
+			// TURN ON
+			~pulseState = 1;
+			// SEND WHATEVER UPDATE IS N EEDED TO PIS HERE
+			~setAndTurnPulseOn.();
+		},
+		{
+			// TURN OFF
+			~pulseState = 0;
+			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
+			~turnPulseOff.();
+	});
+	["PULSE STATE:", ~pulseState].postln;
+});
+
+// 2. TERNARY CODE
 ~ternaryState = 0;
 ternaryStateButton = Button(w, 160@30)
 .states_([
@@ -33,41 +58,47 @@ ternaryStateButton = Button(w, 160@30)
 			// TURN ON
 			~ternaryState = 1;
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
-			~sendSines.(~ternaryFreqs, Array.fill(8, { synthNum }), Array.fill(8, { 1 }), Array.fill(8, { gain }));
+			~sendSines.(~ternaryFreqs, synthNum, 1, gain);
 		},
 		{
-			var synthNum=1; // change this if needed
 			// TURN OFF
 			~ternaryState = 0;
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
-			~turnSinesOff.(Array.fill(8, { synthNum }));
+			~turnSinesOff.(0); // turn off both synths
+			~turnSinesOff.(1);
 
 	});
 	["TERNARY STATE:", ~ternaryState].postln;
 });
 
-~pulseState = 0;
-pulseStateButton = Button(w, 170@30)
+// 3. ROOM PITCH/BLUEPRINT MODE
+~roomPitchState = 0;
+ternaryStateButton = Button(w, 180@30)
 .states_([
-	["PULSE MODE IS OFF", Color.black, Color.red],
-	["PULSE MODE IS ON", Color.black, Color.green]
+	["ROOM PITCH MODE IS OFF", Color.black, Color.red],
+	["ROOM PITCH MODE IS ON", Color.black, Color.green]
 ])
 .action_( {
 	arg butt;
-	if( ~fmPulseState == 0,
+	if( ~roomPitchState == 0,
 		{
+			var synthNum=0, gain=0.5, freqs; // change this if needed
 			// TURN ON
-			~pulseState = 1;
+			~roomPitchState = 1;
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
-			~setAndTurnPulseOn.();
+			// get random freqs
+			freqs = ~getRoomPitches.();
+			~sendSines.(freqs, synthNum, 2, gain); // try 2 harmonic synth?
 		},
 		{
 			// TURN OFF
-			~pulseState = 0;
+			~roomPitchState = 0;
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
-			~turnPulseOff.();
+			~turnSinesOff.(0); // turn off both synths
+			~turnSinesOff.(1);
+
 	});
-	["PULSE STATE:", ~pulseState].postln;
+	["TERNARY STATE:", ~ternaryState].postln;
 });
 
 ~fieldPlayState = 0;
@@ -83,14 +114,23 @@ fieldPlayStateButton = Button(w, 170@30)
 			// TURN ON
 			~fieldPlayState = 1;
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
+			~turnFieldPlayOn.(~getSoundFiles.("interiors"), 0);
+			~turnFieldPlayOn.(~getSoundFiles.("exteriors"), 1);
+			~setFieldPlayRandUpdates.(true, 0);
+			~setFieldPlayRandUpdates.(true, 1);
 		},
 		{
 			// TURN OFF
 			~fieldPlayState = 0;
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
+			~setFieldPlayRandUpdates.(false, 0);
+			~setFieldPlayRandUpdates.(false, 1);
+			~turnFieldPlayOff.(0);
+			~turnFieldPlayOff.(1);
 	});
 	["FIELDPLAY STATE:", ~fieldPlayState].postln;
 });
+
 
 ~feedbackState = 0;
 feedbackStateButton = Button(w, 170@30)

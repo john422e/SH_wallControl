@@ -5,38 +5,39 @@ from random import randrange
 import time
 
 # GLOBALS
+running = True
 localIP = "127.0.0.1"
 sendPort = 10000
 rcvPort = 5000
-pingAddress = "/w"
+pingAddress = "/setPing"
+shutdownAddress = "/shutdown"
 
-finished = False
 dummyDistance = 0
 step = 1
 
 
 pingInterval = 0.25 # in seconds
-pingStates = [0, 0]
+pingState = 0
 
-def setPing(synthNum, newPingState):
+def setPing(newPingState):
     # sets ping state to 0 or 1
     print("PYTHON: PING!")
 
     global pingStates
-    pingStates[synthNum] = newPingState
+    pingState = newPingState
 
-def sendDistance(synthNum):
+def sendDistance():
     # sends distance to proper synthNum
     dummyDistance = randrange(0.0, 300.0)
     dummyDistance = float(dummyDistance)
     # build message
     print(dummyDistance)
-    msg = oscbuildparse.OSCMessage("/distance", None, [synthNum, dummyDistance])
+    msg = oscbuildparse.OSCMessage("/distance", None, [dummyDistance])
     osc_send(msg, "SENDER CLIENT")
 
 def shutdown():
     print("SHUTTING SENSOR DOWN")
-    finished = True
+    running = False
 
 # start the system
 osc_startup()
@@ -46,8 +47,8 @@ osc_startup()
 osc_udp_server(localIP, rcvPort, "SENSOR PING SERVER")
 # assign functions
 osc_method(pingAddress, setPing)
-osc_method("/shutdown", shutdown)
-print("SERVING ON PORT", rcvPort)
+osc_method(shutdownAddress, shutdown)
+print("d2.py SERVING ON PORT", rcvPort)
 
 # CLIENT-----------------------------------------------
 osc_udp_client(localIP, sendPort, "SENDER CLIENT")
@@ -55,9 +56,9 @@ osc_udp_client(localIP, sendPort, "SENDER CLIENT")
 # loop and listen
 while not finished:
     osc_process()
-    for i, pingState in enumerate(pingStates):
-        if pingState == 1:
-            sendDistance(i)
+    # only fetch distance and send when pingState == 1
+    if pingState == 1:
+        sendDistance(i)
     time.sleep(pingInterval)
 
 print("EXITING")
