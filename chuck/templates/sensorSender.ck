@@ -94,8 +94,11 @@ fun void oscListener() {
             // or /distance followed by a float arg
             //<<< "sensorSender.ck", msg.address >>>;
             
-            // sensor on/off
+            // sensor on
             if( msg.address == "/sensorInit") sensorInit();
+            
+            // sensor off
+            if( msg.address == "/sensorShutdown") sensorShutdown();
             
             // hard reboot (emergencies only)
             if( msg.address == "/rebootSensor" ) rebootSensor();
