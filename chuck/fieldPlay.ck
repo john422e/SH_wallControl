@@ -142,8 +142,8 @@ fun void setValsFromDistance(float dist) {
             if( synthStates[i] == 1 ) {
                 if( i == 1 ) {
                     <<< "BEFORE AMP", amp >>>;
-                    amp*2 => amp; // double the amp for the exterior sounds (speakers)
-                    <<< "DOUBLED AMP", amp >>>;
+                    amp*3 => amp; // double the amp for the exterior sounds (speakers)
+                    <<< "TRIPLED AMP", amp >>>;
                 }
                 amp => gains[synth].gain; // PROBABLY NEED TO SMOOTH THIS
                 //amp => filters[synth].gain;
@@ -151,6 +151,14 @@ fun void setValsFromDistance(float dist) {
                 spork ~ bufEnvs[synth].keyOn();
             }
             else { // go to min amp val
+                if( i == 1 ) {
+                    // double everything for exterior sounds (speakers)
+                    //10.0 => filters[synth].Q;
+                    (minAmp*2) => gains[synth].gain;
+                    //minAmp => filters[synth].gain;
+                    (minAmp*2) => bufEnvs[synth].target;
+                }
+                    
                 //10.0 => filters[synth].Q;
                 minAmp => gains[synth].gain;
                 //minAmp => filters[synth].gain;
