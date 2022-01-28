@@ -60,7 +60,7 @@ for( 0 => int i; i < numSynths; i++ ) {
   filters[i].set(500.0, 0.58); // default filter settings (change freq?)
   // set compressor settings
   comps[i].compress();
-  0.07 => comps[i].thresh;
+  0.7 => comps[i].thresh;
   20.0 => comps[i].ratio;
 }
 
@@ -254,13 +254,14 @@ fun void bufPlayLoop( SndBuf buf, Envelope env ) {
 }
 
 // initiate random change in BPF
-fun void bufChange( BPF bpf, Envelope env ) {
+fun void bufChange( BPF bpf, Envelope env, float q; ) {
     <<< "fieldPlay.ck CHANGING BPF STATE" >>>;
     // turn off
     env.keyOff();
     50::ms => now;
     // make sure Q is at a high value
-    10.0 => bpf.Q;
+    //10.0 => bpf.Q;
+    q => bpf.Q;
     // pick random freq for BPF
     Math.random2f(200, 1500.0) => bpf.freq;
     <<< bpf.freq(), bpf.Q() >>>;
@@ -281,7 +282,7 @@ while( running ) {
         Math.random2(0, 1) => eventTrigger;
         <<< "fieldPlay.ck 0 EVENT TRIGGER:", eventTrigger >>>;
         if( eventTrigger ) {
-            spork ~ bufChange(filters[0], bufEnvs[0]);
+            spork ~ bufChange(filters[0], bufEnvs[0], 10.0); // higher Q for transducer
         }
     }
     // check for update state on synth 2
@@ -289,7 +290,7 @@ while( running ) {
         Math.random2(0, 1) => eventTrigger;
         <<< "fieldPlay.ck 1 EVENT TRIGGER:", eventTrigger >>>;
         if( eventTrigger ) {
-            spork ~ bufChange(filters[1], bufEnvs[1]);
+            spork ~ bufChange(filters[1], bufEnvs[1], 5.0); // lower Q for speaker
         }
     }
     // advance time
