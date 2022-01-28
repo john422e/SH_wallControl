@@ -87,7 +87,8 @@ fun void setSynthGain( float amp, int synthNum ) {
 fun void setAmpFromDistance(float dist) {
     //<<< "stdSynth.ck /distance", dist >>>;
     // sensor vars
-    150.0 => float thresh;
+    
+    100.0 => float thresh;
     10.0 => float distOffset; // can set for each sensor if irregularities too much
     float amp;
     
