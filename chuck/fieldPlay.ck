@@ -21,7 +21,7 @@ cassia channels:
 
 1 => int running;
 int synth;
-0.2 => float minAmp;
+0.4 => float minAmp;
 
 // time/event tracking
 0 => int second_i;
@@ -60,7 +60,7 @@ for( 0 => int i; i < numSynths; i++ ) {
   filters[i].set(500.0, 0.58); // default filter settings (change freq?)
   // set compressor settings
   comps[i].compress();
-  0.6 => comps[i].thresh;
+  0.7 => comps[i].thresh;
   20.0 => comps[i].ratio;
 }
 
@@ -248,7 +248,8 @@ fun void bufChange( BPF bpf, Envelope env ) {
     // make sure Q is at a high value
     10.0 => bpf.Q;
     // pick random freq for BPF
-    Math.random2f(150, 1500.0) => bpf.freq;
+    Math.random2f(200, 1500.0) => bpf.freq;
+    <<< bpf.freq(), bpf.Q() >>>;
     // turn back on
     env.keyOn();
     50::ms => now;
