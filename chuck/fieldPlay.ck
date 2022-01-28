@@ -130,7 +130,7 @@ fun void setValsFromDistance(float dist) {
 
     // set these
     40.0 => float ampScaler;
-    15.0 => float qScaler;
+    15.0 => float qScaler; // NOT USING THIS RIGHT NOW
 
         
     // turn on sound if value below thresh
@@ -140,6 +140,7 @@ fun void setValsFromDistance(float dist) {
         // no synthNum comes in here, so have to check manually
         for( 0 => int i; i < numSynths; i++ ) {
             if( synthStates[i] == 1 ) {
+                if( i == 1 ) amp*2 => amp; // double the amp for the exterior sounds
                 amp => gains[synth].gain; // PROBABLY NEED TO SMOOTH THIS
                 //amp => filters[synth].gain;
                 amp => bufEnvs[synth].target;
