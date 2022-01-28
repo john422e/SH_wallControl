@@ -42,7 +42,7 @@ in.listenAll(); // start listener
 fun void sensorInit() {
     // turns sensor program on
     <<< "sensorSender.ck TURNING SENSOR ON" >>>;
-    me.dir() + "../../python/" + sensorProgram => string targetFile;
+    me.dir() + "../python/" + sensorProgram => string targetFile;
     "python3 " + targetFile + " &" => string command;
     Std.system(command);
 }
@@ -72,7 +72,7 @@ fun void rebootSensor() {
     Std.system("pkill python3");
     1::second => now;
     // now start up sensor program again
-    me.dir() + "../../python/" + sensorProgram => string targetFile;
+    me.dir() + "../python/" + sensorProgram => string targetFile;
     "python3 " + targetFile + " &" => string command;
     Std.system(command);
 }
