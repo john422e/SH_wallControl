@@ -129,7 +129,7 @@ fun void setValsFromDistance(float dist) {
     30 => int distSmoother; // val to feed normalize because minAmp is > 0
 
     // set these
-    20.0 => float ampScaler;
+    25.0 => float ampScaler;
     20.0 => float qScaler;
 
         
