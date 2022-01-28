@@ -59,9 +59,9 @@ for( 0 => int i; i < numSynths; i++ ) {
   // set filters
   filters[i].set(500.0, 0.58); // default filter settings (change freq?)
   // set compressor settings
-  //comps[i].compress();
-  //0.05 => comps[i].thresh;
-  //20.0 => comps[i].ratio;
+  comps[i].compress();
+  0.6 => comps[i].thresh;
+  20.0 => comps[i].ratio;
 }
 
 // -----------------------------------------------------------------------------
