@@ -140,7 +140,11 @@ fun void setValsFromDistance(float dist) {
         // no synthNum comes in here, so have to check manually
         for( 0 => int i; i < numSynths; i++ ) {
             if( synthStates[i] == 1 ) {
-                if( i == 1 ) amp*2 => amp; // double the amp for the exterior sounds
+                if( i == 1 ) {
+                    <<< "BEFORE AMP", amp >>>;
+                    amp*2 => amp; // double the amp for the exterior sounds (speakers)
+                    <<< "DOUBLED AMP", amp >>>;
+                }
                 amp => gains[synth].gain; // PROBABLY NEED TO SMOOTH THIS
                 //amp => filters[synth].gain;
                 amp => bufEnvs[synth].target;
