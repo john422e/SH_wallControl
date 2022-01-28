@@ -129,8 +129,8 @@ fun void setValsFromDistance(float dist) {
     30 => int distSmoother; // val to feed normalize because minAmp is > 0
 
     // set these
-    25.0 => float ampScaler;
-    20.0 => float qScaler;
+    35.0 => float ampScaler;
+    10.0 => float qScaler;
 
         
     // turn on sound if value below thresh
