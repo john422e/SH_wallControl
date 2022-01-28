@@ -144,11 +144,17 @@ fun void setValsFromDistance(float dist) {
                     <<< "BEFORE AMP", amp >>>;
                     amp*2 => amp; // double the amp for the exterior sounds (speakers)
                     <<< "TRIPLED AMP", amp >>>;
+                    amp => gains[synth].gain; // PROBABLY NEED TO SMOOTH THIS
+                    //amp => filters[synth].gain;
+                    amp => bufEnvs[synth].target;
+                    spork ~ bufEnvs[synth].keyOn();
                 }
-                amp => gains[synth].gain; // PROBABLY NEED TO SMOOTH THIS
-                //amp => filters[synth].gain;
-                amp => bufEnvs[synth].target;
-                spork ~ bufEnvs[synth].keyOn();
+                else {
+                    amp => gains[synth].gain; // PROBABLY NEED TO SMOOTH THIS
+                    //amp => filters[synth].gain;
+                    amp => bufEnvs[synth].target;
+                    spork ~ bufEnvs[synth].keyOn();
+                }
             }
             else { // go to min amp val
                 if( i == 0 ) {
