@@ -101,6 +101,7 @@ fun void setAmpFromDistance(float dist) {
         // no synthNum comes in here, so have to check manually
         for( 0 => int i; i < numSynths; i++ ) {
             if( synthStates[i] == 1 ) {
+                if( i == 0 ) amp*2 => amp; // only for transducers, double amp
                 amp => synthEnvs[i].target;
                 spork ~ synthEnvs[i].keyOn();
             }
