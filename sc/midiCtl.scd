@@ -8,7 +8,8 @@ MIDIFunc.trace(false);
 ~primePair = [3/2, 5/4];
 ~ternaryFreqs;
 
-
+// need to get rid of this
+~ternaryState = 1;
 
 // MIDI defs
 MIDIdef.cc( \ternaryCtl, {
@@ -39,13 +40,18 @@ MIDIdef.cc( \ternaryCtl, {
 					~ternaryFreqs = ~setFreqsFromChain.(~chain, ~primePair);
 					~ternaryFreqs.postln;
 					// add network send function here
-					~sendSines.(~ternaryFreqs, Array.fill(8, { synthNum }), Array.fill(8, { 1 }), Array.fill(8, { gain }));
+					//~sendSines.(~ternaryFreqs, Array.fill(8, { synthNum }), Array.fill(8, { 1 }), Array.fill(8, { gain }));
+					~sendSines.(~ternaryFreqs, synthNum, 1, gain);
 				};
 			);
 
 			// add a control for ternary mode on/off here
 	});
 });
+)
+
+
+(
 
 
 MIDIdef.cc( \fieldPlay, {

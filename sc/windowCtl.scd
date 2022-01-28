@@ -1,6 +1,6 @@
 (
 var wWidth=1700, wHeight=130, title="SOUND HOUSE";
-var netState, sensorState, sensorPingingState, ternaryState, pulseState, roomPitchState, fieldPlayState, feedbackState, alarmState, shutdown;
+var netState, sensorState, sensorPingingState, ternaryState, pulseState, roomPitchState, fieldPlayState, feedbackState, alarmState, hybridState, shutdown;
 var modeButtons;
 
 
@@ -23,7 +23,7 @@ w.view.decorator_(FlowLayout(w.bounds, 10@10, 10@10));
 // 1. NETWORK STATE MODE
 netState = ListView(w, 200@70)
 .items_(
-	["NONE", "DEV MODE—local", "DEV MODE—pione", "PERFORMANCE MODE—8 pis"])
+	["NONE", "DEV MODE—local", "pione", "pitwo", "pithree", "pifour", "pifive", "pisix", "piseven", "pieight", "PERFORMANCE MODE—8 pis"])
 .background_(Color.clear)
 .hiliteColor_(Color.green(alpha:0.6))
 .action_({
@@ -31,7 +31,14 @@ netState = ListView(w, 200@70)
 	switch (sel.value,
 		1, { ~hostnames = ["127.0.0.1"]},
 		2, { ~hostnames = ["pione.local"]},
-		3, { ~hostnames = [
+		3, { ~hostnames = ["pitwo.local"]},
+		4, { ~hostnames = ["pithree.local"]},
+		5, { ~hostnames = ["pifour.local"]},
+		6, { ~hostnames = ["pifive.local"]},
+		7, { ~hostnames = ["pisix.local"]},
+		8, { ~hostnames = ["piseven.local"]},
+		9, { ~hostnames = ["pieight.local"]},
+		10, { ~hostnames = [
 			"pione.local",
 			"pitwo.local",
 			"pithree.local",
@@ -314,6 +321,33 @@ alarmState = Button(w, 170@30)
 	["ALARM STATE:", butt.value].postln;
 });
 
+// 8. ADD ANY HYBRID MODES LIKE THIS
+hybridState = Button(w, 170@30)
+.states_([
+	["HYBRID MODE IS OFF", Color.black, Color.red],
+	["HYBRID MODE IS ON", Color.black, Color.green]
+])
+.action_( {
+	arg butt;
+	var numAlarms = rrand(2, 3);
+	if( butt.value == 1,
+		{
+			// TURN ON
+			// TURN ALL THE OTHER MODES OFF
+			modeButtons.do( {
+				arg modeButts, i;
+				var thisIndex;
+				thisIndex = modeButtons.indexOf(butt);
+				if( (i > 1) && (i != thisIndex), { modeButts.valueAction_(0)});
+			});
+		},
+		{
+			// TURN OFF
+			"TURNING OFF".postln;
+	});
+	["HYBRID STATE:", butt.value].postln;
+});
+
 // 8. SHUTDOWN BUTTON
 shutdown = Button(w, 200@30)
 .states_([
@@ -332,5 +366,5 @@ shutdown = Button(w, 200@30)
 });
 
 // put all buttons in a list
-modeButtons = [sensorState, sensorPingingState, pulseState, ternaryState, roomPitchState, fieldPlayState, feedbackState, alarmState];
+modeButtons = [sensorState, sensorPingingState, pulseState, ternaryState, roomPitchState, fieldPlayState, feedbackState, alarmState, hybridState];
 )

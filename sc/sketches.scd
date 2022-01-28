@@ -26,6 +26,10 @@
 
 
 (
+a = ['a', 'b', 'c', 'd', 'e'];
+a.indexOf('c');
+
+
 Routine {
 	8.do {
 		arg i;
