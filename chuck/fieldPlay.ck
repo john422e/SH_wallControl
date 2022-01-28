@@ -115,7 +115,7 @@ fun void setRandUpdates(int synthNum, int randState, int seed) {
     
     // TRYING WITHOUT THIS, REENABLE IF TOO WEIRD
     
-    //if( randFilterUpdates[synthNum] == 1) spork ~ bufChange(filters[synthNum], bufEnvs[synthNum]);
+    if( randFilterUpdates[synthNum] == 1) spork ~ bufChange(filters[synthNum], bufEnvs[synthNum]);
 }
 
 fun void setValsFromDistance(float dist) {
