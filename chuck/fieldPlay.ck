@@ -121,7 +121,7 @@ fun void setRandUpdates(int synthNum, int randState, int seed) {
 fun void setValsFromDistance(float dist) {
     <<< "fieldPlay.ck /distance", dist >>>;
     // sensor vars
-    300.0 => float thresh;
+    150.0 => float thresh;
     10.0 => float distOffset;
     float amp;
     float qVal;
