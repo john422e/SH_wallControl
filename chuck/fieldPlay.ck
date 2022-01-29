@@ -78,7 +78,7 @@ fun float normalize( float inVal, float x1, float x2 ) {
     */
     // catch out of range numbers and cap
     // for inverted ranges
-    if( x1 > x2 ) { 
+    if( x1 > x2 ) {
         if( inVal < x2 ) x2 => inVal;
         if( inVal > x1 ) x1 => inVal;
     }
@@ -112,10 +112,10 @@ fun void setRandUpdates(int synthNum, int randState, int seed) {
     <<< "fieldPlay.ck RAND UPDATES SET:", synthNum, randFilterUpdates[synthNum] >>>;
     Math.srandom(seed); // set seed based on pi num
     // if 1, do a change right away
-    
+
     // TRYING WITHOUT THIS, REENABLE IF TOO WEIRD
-    
-    if( randFilterUpdates[synthNum] == 1) spork ~ bufChange(filters[synthNum], bufEnvs[synthNum]);
+
+    if( randFilterUpdates[synthNum] == 1) spork ~ bufChange(filters[synthNum], bufEnvs[synthNum], 5.0);
 }
 
 fun void setValsFromDistance(float dist) {
@@ -125,14 +125,14 @@ fun void setValsFromDistance(float dist) {
     10.0 => float distOffset;
     float amp;
     float qVal;
-    
+
     30 => int distSmoother; // val to feed normalize because minAmp is > 0
 
     // set these
     40.0 => float ampScaler;
     15.0 => float qScaler; // NOT USING THIS RIGHT NOW
 
-        
+
     // turn on sound if value below thresh
     if( dist < thresh && dist > 0.0 ) {
         normalize(dist, thresh+distSmoother, distOffset) * ampScaler => amp;
@@ -140,36 +140,36 @@ fun void setValsFromDistance(float dist) {
         // no synthNum comes in here, so have to check manually
         for( 0 => int i; i < numSynths; i++ ) {
             if( synthStates[i] == 1 ) {
-                if( i == 0 ) {
-                    <<< "BEFORE AMP", amp >>>;
+                if( i == 1 ) {
+                    //<<< "BEFORE AMP", amp >>>;
                     amp*2 => amp; // double the amp for the exterior sounds (speakers)
-                    <<< "TRIPLED AMP", amp >>>;
-                    amp => gains[synth].gain; // PROBABLY NEED TO SMOOTH THIS
+                    //<<< "TRIPLED AMP", amp >>>;
+                    amp => gains[i].gain; // PROBABLY NEED TO SMOOTH THIS
                     //amp => filters[synth].gain;
-                    amp => bufEnvs[synth].target;
-                    spork ~ bufEnvs[synth].keyOn();
+                    amp => bufEnvs[i].target;
+                    spork ~ bufEnvs[i].keyOn();
                 }
                 else {
-                    amp => gains[synth].gain; // PROBABLY NEED TO SMOOTH THIS
+                    amp => gains[i].gain; // PROBABLY NEED TO SMOOTH THIS
                     //amp => filters[synth].gain;
-                    amp => bufEnvs[synth].target;
-                    spork ~ bufEnvs[synth].keyOn();
+                    amp => bufEnvs[i].target;
+                    spork ~ bufEnvs[i].keyOn();
                 }
             }
             else { // go to min amp val
-                if( i == 0 ) {
+                if( i == 1 ) {
                     // double everything for exterior sounds (speakers)
                     //10.0 => filters[synth].Q;
-                    (minAmp*2) => gains[synth].gain;
+                    (minAmp*2) => gains[i].gain;
                     //minAmp => filters[synth].gain;
-                    (minAmp*2) => bufEnvs[synth].target;
+                    (minAmp*2) => bufEnvs[i].target;
                 }
-                    
+
                 //10.0 => filters[synth].Q;
-                minAmp => gains[synth].gain;
+                minAmp => gains[i].gain;
                 //minAmp => filters[synth].gain;
-                minAmp => bufEnvs[synth].target;
-                spork ~ bufEnvs[synth].keyOn();
+                minAmp => bufEnvs[i].target;
+                spork ~ bufEnvs[i].keyOn();
             }
         }
     }
@@ -184,39 +184,39 @@ fun void endProgram() {
 // receiver function -> everything is triggered from this
 fun void oscListener() {
   <<< "fieldPlay.ck BUFFER SYNTHS LISTENING ON PORT:", port >>>;
-  
+
   while( true ) {
     in => now; // wait for a message
     while( in.recv(msg)) {
-        
-        // for every address but /distance, the first arg will be an int for the right synth number 
+
+        // for every address but /distance, the first arg will be an int for the right synth number
         msg.getInt(0) => synth;
-        
+
         // global synth state, arg = 0 or 1 for on/off
         if( msg.address == "/bufSynthState" ) setSynthState(synth, msg.getInt(1));
-        
+
         // end program
         if( msg.address == "/endProgram" ) endProgram();
-        
+
         // ONLY CHECK IF SYNTH STATE IS ON
-        if( synthStates[0] == 1 || synthStates[1] == 1 ) { 
+        if( synthStates[0] == 1 || synthStates[1] == 1 ) {
             // all messages should have an address for event type
             // first arg should always be an int (0 or 1) specifying synth
-            //<<< "fieldPlay.ck", msg.address >>>;
-            
+            <<< "fieldPlay.ck", msg.address >>>;
+
             // buf init (read in file)
             if( msg.address == "/bufRead") readInFile(bufs[synth], msg.getString(1));
-            
+
             // bufs on/off
             if( msg.address == "/bufOn") spork ~ bufPlayLoop( bufs[synth], bufEnvs[synth]); // start looping
             if( msg.address == "/bufOff") 0 => bufs[synth].loop;
-            
+
             // set randUpdates on/off
             if( msg.address == "/randUpdates" ) setRandUpdates(synth, msg.getInt(1), msg.getInt(2));
 
             // gain
             if( msg.address == "/bufGain") msg.getFloat(1) => gains[synth].gain;
-            
+
             // filter
             if( msg.address == "/bufFilterFreq") msg.getFloat(1) => filters[synth].freq;
             if( msg.address == "/bufFilterQ") msg.getFloat(1) => filters[synth].Q;
@@ -254,7 +254,7 @@ fun void bufPlayLoop( SndBuf buf, Envelope env ) {
 }
 
 // initiate random change in BPF
-fun void bufChange( BPF bpf, Envelope env, float q; ) {
+fun void bufChange( BPF bpf, Envelope env, float q ) {
     <<< "fieldPlay.ck CHANGING BPF STATE" >>>;
     // turn off
     env.keyOff();

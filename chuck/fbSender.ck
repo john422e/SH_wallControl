@@ -1,3 +1,13 @@
+/*
+ADD THIS AS A LOCAL HOST IN SC
+ADD STATE VAR FOR SENDER
+ADD FUNCTION FOR FB MODE TO START SENDING/STOP SENDING
+*/
+
+
+
+
+
 // sender.ck
 // Eric Heep
 
@@ -24,21 +34,22 @@ envelope length
 
 // ip addresses
 [
-"pione.local",
-"pitwo.local",
-"pithree.local",
-"pifour.local",
-"pifive.local",
-"pisix.local",
-"piseven.local",
-"pieight.local"
+"127.0.0.1"
+//"pione.local",
+//"pitwo.local",
+//"pithree.local",
+//"pifour.local",
+//"pifive.local",
+//"pisix.local",
+//"piseven.local",
+//"pieight.local"
 ] @=> string IP[];
 
 IP.size() => int NUM_IPS;
 IP.size() => int NUM_PIS;
 
 // port is the same for all outgoing messages
-10001 => int OUT_PORT;
+10000 => int OUT_PORT;
 
 // address is the same for all outgoing messages
 "/m" => string ADDRESS;
@@ -89,10 +100,10 @@ fun void envelopeFollower(int i) {
 			1::samp => now;
 		}
 		<<< "Sound.", "" >>>;
-		
+
 		send(i);
 		now => time past;
-		
+
 		while (now < past + packetLength[i]) {
 			send(i);
 		}
@@ -102,12 +113,12 @@ fun void envelopeFollower(int i) {
 // sends out audio in 512 sample blocks
 fun void send(int i) {
 	out[i].start(ADDRESS);
-	
+
 	for (0 => int j; j < BUFFER_SIZE; j++) {
 		out[i].add(del[i].last());
-		2::samp => now;
+		1::samp => now;
 	}
-	
+
 	out[i].send();
 }
 
@@ -122,24 +133,24 @@ for (0 => int i; i < NUM_PIS; i++) {
 	//mic => gain[i] => lp[i] => hp[i] => del[i] => blackhole;
 	//mic => gain[i] => del[i] => blackhole;
 	adc => pole[i] => blackhole;
-	
+
 	// delay of adc
 	100::ms => delayLength[i];
-	
+
 	// delay stuff
 	del[i].max(100::ms);
 	del[i].delay(100::ms);
-	
+
 	hp[i].freq(0.1);
 	lp[i].freq(10000.0);
-	
+
 	// following
 	3 => pole[i].op;
 	0.9999 => pole[i].pole;
-	
+
 	// thresholds in decibels
 	10 => threshold[i];
-	
+
 	// this determines how much audio is send through in milliseconds
 	500::ms => packetLength[i];
 }
@@ -147,15 +158,15 @@ for (0 => int i; i < NUM_PIS; i++) {
 for (0 => int i; i < NUM_IPS; i++) {
 	// start the envelope follower
 	spork ~ envelopeFollower(i);
-	
+
 	// set ip and port for each osc out
 	out[i].dest(IP[i], OUT_PORT);
-	
+
 	// set buffer_size
 	out[i].start("/bufferSize");
 	out[i].add(BUFFER_SIZE);
 	out[i].send();
-	
+
 }
 
 // --------------------------------------------------------------

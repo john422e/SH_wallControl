@@ -28,6 +28,7 @@ def setPing(newPingState):
 def sendDistance():
     # sends distance to proper synthNum
     dummyDistance = randrange(0.0, 300.0)
+    #dummyDistance = 10.0
     dummyDistance = float(dummyDistance)
     # build message
     #print("d2.py distance:", dummyDistance)

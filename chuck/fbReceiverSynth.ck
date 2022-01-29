@@ -17,7 +17,7 @@ expanding on Eric Heep's receiver.ck, 2015
 OscIn in;
 OscMsg msg;
 
-10001 => int port;
+10000 => int port;
 port => in.port;
 in.listenAll();
 
@@ -25,7 +25,14 @@ in.listenAll();
 // AUDIO
 // -----------------------------------------------------------------------------
 
-Step st => Envelope stEnv => Gain stGain => Pan2 stPan => dac; // out to both chans?
+Step st => Envelope stEnv => JCRev rev => Gain stGain => Dyno limiter => Pan2 stPan => dac; // out to both chans?
+
+
+// CAN PLAY WITH THESE SETTINGS
+0.5 => rev.mix;
+0.9 => stGain.gain;
+limiter.limit();
+0.7 => limiter.thresh;
 
 // constant
 512 => int bufferSize;
@@ -43,33 +50,33 @@ fun void oscListener() {
             if( msg.address == "/fbSynthState" ) msg.getInt(0) => synthState;
             // end program
             if( msg.address == "/endProgram" ) 0 => running;
-            
+
             // ONLY CHECK IF synthState == 1
             if( synthState == 1 ) {
                 // receive packet of audio samples
                 if (msg.address == "/m") {
                     <<< "received sound" >>>;
-                    
+
                     // turn it on
                     stGain.gain(1.0);
                     stEnv.keyOn();
-                    
+
                     // start the sample playback
                     for (0 => int i; i < bufferSize; i++) {
                         msg.getFloat(i) => st.next;
                         1::samp => now;
                     }
-                    
+
                     // turn it off
-                    stGain.gain(0.0);
+                    //stGain.gain(0.0);
                     stEnv.keyOff();
                 }
-                
+
                 if (msg.address == "/bufferSize") {
                     msg.getInt(0) => bufferSize;
                     <<< "Buffer size set to", bufferSize, "" >>>;
                 }
-            }                
+            }
             1::samp => now;
         }
     }

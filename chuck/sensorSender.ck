@@ -11,7 +11,7 @@ Std.system("pkill python3");
 // GLOBALS
 // -----------------------------------------------------------------------------
 1 => int running;
-"d3.py" => string sensorProgram;
+"d3.py" => string sensorProgram; // d2 for simulation, d3 for realz
 
 // -----------------------------------------------------------------------------
 // OSC
@@ -93,19 +93,19 @@ fun void oscListener() {
             // addresses coming through are either /sensorOn, /sensorOff,
             // or /distance followed by a float arg
             //<<< "sensorSender.ck", msg.address >>>;
-            
+
             // sensor on
             if( msg.address == "/sensorInit") sensorInit();
-            
+
             // sensor off
             if( msg.address == "/sensorShutdown") sensorShutdown();
-            
+
             // hard reboot (emergencies only)
             if( msg.address == "/rebootSensor" ) rebootSensor();
-            
+
             // shutdown sensor and chuck
             if( msg.address == "/endProgram") endProgram();
-            
+
             // start pinging sensor program
             if( msg.address == "/sensorOn") setPinging(1);
 
