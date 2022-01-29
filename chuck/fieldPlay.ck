@@ -129,6 +129,7 @@ fun void setValsFromDistance(float dist) {
     30 => int distSmoother; // val to feed normalize because minAmp is > 0
 
     // set these
+    1.5 => float extBoost;
     40.0 => float ampScaler;
     15.0 => float qScaler; // NOT USING THIS RIGHT NOW
 
@@ -142,7 +143,7 @@ fun void setValsFromDistance(float dist) {
             if( synthStates[i] == 1 ) {
                 if( i == 1 ) {
                     //<<< "BEFORE AMP", amp >>>;
-                    amp*2 => amp; // double the amp for the exterior sounds (speakers)
+                    amp*extBoost => amp; // double the amp for the exterior sounds (speakers)
                     //<<< "TRIPLED AMP", amp >>>;
                     amp => gains[i].gain; // PROBABLY NEED TO SMOOTH THIS
                     //amp => filters[synth].gain;
