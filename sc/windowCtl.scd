@@ -49,6 +49,8 @@ netState = ListView(w, 200@70)
 			"pieight.local"
 		]}
 	);
+	// make a local host for mic sender
+	~localHost = ~makeLocalHost.();
 	// reset all buttons
 	modeButtons.do( {
 		arg butt, i;
@@ -56,6 +58,8 @@ netState = ListView(w, 200@70)
 	});
 	// some way to free NetAddr? is it needed?
 	~hosts = ~makeHosts.(~hostnames);
+	// make local host for fbSender
+	~localHost = ~makeLocalHost.();
 });
 
 // 1. SENSOR PROGRAM STATE
@@ -282,11 +286,15 @@ feedbackState = Button(w, 170@30)
 			});
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
 			"FEEDBACK ON".postln;
+			// turn on sender
+			~setLocalSender.(~localHost, 1);
 		},
 		{
 			// TURN OFF
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
 			"FEEDBACK OFF".postln;
+			// turn off sender
+			~setLocalSender.(~localHost, 0);
 	});
 	["FEEDBACK STATE:", butt.value].postln;
 });
@@ -360,6 +368,8 @@ shutdown = Button(w, 200@30)
 		arg modeButts, i;
 		modeButts.valueAction_(0);
 	});
+	// turn off local sender
+	~localHost.sendMsg( "/endProgram");
 	// reset netState
 	netState.valueAction_(0);
 	"SHUTTING DOWN REMOTE SERVER".postln;
@@ -368,3 +378,5 @@ shutdown = Button(w, 200@30)
 // put all buttons in a list
 modeButtons = [sensorState, sensorPingingState, pulseState, ternaryState, roomPitchState, fieldPlayState, feedbackState, alarmState, hybridState];
 )
+~hosts;
+~localHost;

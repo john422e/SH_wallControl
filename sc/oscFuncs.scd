@@ -11,6 +11,13 @@
 	hosts;
 };
 
+~makeLocalHost = {
+	arg hostname = "127.0.0.1", port=7400;
+	var host;
+	host = NetAddr.new( hostname, port);
+	host;
+};
+
 // general use func
 ~setOneParam = {
 	// expects an array of 8 integers
@@ -163,6 +170,12 @@
 	});
 	// turn off rand updates too
 	~setFieldPlayRandUpdates.(false, synthNum);
+};
+
+// FOR FEEDBACK MODE
+~setLocalSender = {
+	arg host, state; // 0 or 1 off/on
+	host.sendMsg('/senderState', state);
 };
 
 // FOR ALARM MODE: GET WALLS AND TURN ON THOSE (2 or 3)

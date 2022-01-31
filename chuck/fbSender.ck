@@ -1,11 +1,6 @@
 /*
-ADD THIS AS A LOCAL HOST IN SC
-ADD STATE VAR FOR SENDER
-ADD FUNCTION FOR FB MODE TO START SENDING/STOP SENDING
+
 */
-
-
-
 
 
 // sender.ck
@@ -25,6 +20,14 @@ resonance Q per pi
 envelope length
 */
 
+// -----------------------------------------------------------------------------
+// GLOBALS
+// -----------------------------------------------------------------------------
+
+"fbSender.ck" => string thisFile;
+1 => int running;
+0 => int senderState;
+
 // constants
 512 => int BUFFER_SIZE;
 
@@ -33,8 +36,8 @@ envelope length
 // --------------------------------------------------------------
 
 // ip addresses
+/*
 [
-//"127.0.0.1"
 "pione.local",
 "pitwo.local",
 "pithree.local",
@@ -44,6 +47,8 @@ envelope length
 "piseven.local",
 "pieight.local"
 ] @=> string IP[];
+*/
+[ "127.0.0.1" ] @=> string IP[];
 
 IP.size() => int NUM_IPS;
 IP.size() => int NUM_PIS;
@@ -68,7 +73,8 @@ OscIn in;
 OscMsg msg;
 
 // the port for the incoming messages
-7400 => in.port;
+7400 => int IN_PORT;
+IN_PORT => in.port;
 in.listenAll();
 
 // --------------------------------------------------------------
@@ -95,19 +101,27 @@ float threshold[NUM_PIS];
 // envelope follower
 fun void envelopeFollower(int i) {
 	// loops until the decibel limit is reached
-	while (true) {
-		while (Std.rmstodb(pole[i].last()) < threshold[i]) {
-			1::samp => now;
-		}
-		<<< "Sound.", "" >>>;
-
-		send(i);
-		now => time past;
-
-		while (now < past + packetLength[i]) {
-			send(i);
-		}
+	while (running) {
+        //<<< senderState >>>;
+        // this loop is working UNTIL senderState gets updated once, then it gets stuck in block below
+		if( senderState == 1 ) {
+            //<<< "SENDING" >>>;
+            /*
+            while (Std.rmstodb(pole[i].last()) < threshold[i]) {
+                // advance time while mic is below threshold val
+                1::samp => now;
+            }
+            */
+            <<< "Sound.", "" >>>;
+            
+            send(i); // send to one pi at a time
+            now => time past;
+            // keep sending until whole packet is sent
+            while (now < past + packetLength[i]) send(i);
+        }
+        1::ms => now;
 	}
+	1::ms => now;
 }
 
 // sends out audio in 512 sample blocks
@@ -122,17 +136,44 @@ fun void send(int i) {
 	out[i].send();
 }
 
+fun void endProgram() {
+    <<< thisFile, "END PROGRAM" >>>;
+    // ends loop and stops program
+    0 => running;
+}
+
+// receiver function -> everything is triggered from this
+fun void oscListener() {
+  <<< thisFile, "FEEDBACK SENDER LISTENING ON PORT:", IN_PORT >>>;
+
+  while( true ) {
+    in => now; // wait for a message
+    while( in.recv(msg)) {
+        //<<< thisFile, msg.address, msg.getInt(0) >>>;
+
+        // global state, arg = 0 or 1 for on/off
+        if( msg.address == "/senderState" ) msg.getInt(0) => senderState;
+
+        // end program
+        if( msg.address == "/endProgram" ) endProgram();
+
+    }
+  }
+}
+
 // --------------------------------------------------------------
 // initialize ---------------------------------------------------
 // --------------------------------------------------------------
 
 for (0 => int i; i < NUM_PIS; i++) {
-	// sound chain
+    // sound chain
 	//SinOsc mic => gain[i] => res[i] => del[i] => blackhole;
-    adc => gain[i] => res[i] => del[i] => blackhole;
+    adc.chan(0) => gain[i] => res[i] => del[i] => blackhole;
+    adc.chan(1) => gain[i];
 	//mic => gain[i] => lp[i] => hp[i] => del[i] => blackhole;
 	//mic => gain[i] => del[i] => blackhole;
-	adc => pole[i] => blackhole;
+	adc.chan(0) => pole[i] => blackhole;
+    adc.chan(1) => pole[i] => blackhole;
 
 	// delay of adc
 	100::ms => delayLength[i];
@@ -149,7 +190,7 @@ for (0 => int i; i < NUM_PIS; i++) {
 	0.9999 => pole[i].pole;
 
 	// thresholds in decibels
-	10 => threshold[i];
+	10 => threshold[i]; // try going higher?
 
 	// this determines how much audio is send through in milliseconds
 	500::ms => packetLength[i];
@@ -169,10 +210,13 @@ for (0 => int i; i < NUM_IPS; i++) {
 
 }
 
+// start OSC server
+spork ~ oscListener();
+
 // --------------------------------------------------------------
 // loop forever
 // --------------------------------------------------------------
 
-while (true) {
-	1::ms => now;
+while (running) {
+	1::second => now;
 }

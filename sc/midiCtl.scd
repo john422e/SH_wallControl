@@ -1,4 +1,11 @@
 (
+// ADD BUTTON FOR BLUEPRINT MODE TRIGGER
+
+
+
+
+
+
 // connect MIDI devices
 MIDIIn.connectAll;
 //MIDIFunc.trace(true);
