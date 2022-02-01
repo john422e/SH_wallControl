@@ -47,7 +47,10 @@ fun void oscListener() {
         in => now;
         while (in.recv(msg)) {
             // set synthState
-            if( msg.address == "/fbSynthState" ) msg.getInt(0) => synthState;
+            if( msg.address == "/fbSynthState" ) {
+                <<< msg.address, msg.getInt(0) >>>;
+                msg.getInt(0) => synthState;
+            };
             // end program
             if( msg.address == "/endProgram" ) 0 => running;
 

@@ -36,19 +36,19 @@ envelope length
 // --------------------------------------------------------------
 
 // ip addresses
-/*
+
 [
 "pione.local",
 "pitwo.local",
 "pithree.local",
 "pifour.local",
 "pifive.local",
-"pisix.local",
-"piseven.local",
-"pieight.local"
+"pisix.local"
+//"piseven.local",
+//"pieight.local"
 ] @=> string IP[];
-*/
-[ "127.0.0.1" ] @=> string IP[];
+
+//[ "127.0.0.1" ] @=> string IP[];
 
 IP.size() => int NUM_IPS;
 IP.size() => int NUM_PIS;
@@ -88,6 +88,7 @@ LPF lp[NUM_PIS];
 ResonZ res[NUM_PIS];
 Delay del[NUM_PIS];
 OnePole pole[NUM_PIS];
+Shred envFollow;
 
 // we'll try this out
 dur delayLength[NUM_PIS];
@@ -104,24 +105,20 @@ fun void envelopeFollower(int i) {
 	while (running) {
         //<<< senderState >>>;
         // this loop is working UNTIL senderState gets updated once, then it gets stuck in block below
-		if( senderState == 1 ) {
-            //<<< "SENDING" >>>;
-            /*
-            while (Std.rmstodb(pole[i].last()) < threshold[i]) {
-                // advance time while mic is below threshold val
-                1::samp => now;
-            }
-            */
-            <<< "Sound.", "" >>>;
-            
-            send(i); // send to one pi at a time
-            now => time past;
-            // keep sending until whole packet is sent
-            while (now < past + packetLength[i]) send(i);
+        <<< "SENDING" >>>;
+        while (Std.rmstodb(pole[i].last()) < threshold[i]) {
+            // advance time while mic is below threshold val
+            1::samp => now;
         }
-        1::ms => now;
+        <<< "Sound.", "" >>>;
+        
+        send(i); // send to one pi at a time
+        now => time past;
+        // keep sending until whole packet is sent
+        while (now < past + packetLength[i]) send(i);
+        //1::ms => now;
 	}
-	1::ms => now;
+	//1::ms => now;
 }
 
 // sends out audio in 512 sample blocks
@@ -190,7 +187,7 @@ for (0 => int i; i < NUM_PIS; i++) {
 	0.9999 => pole[i].pole;
 
 	// thresholds in decibels
-	10 => threshold[i]; // try going higher?
+	25 => threshold[i]; // started at 10, try going higher?
 
 	// this determines how much audio is send through in milliseconds
 	500::ms => packetLength[i];
