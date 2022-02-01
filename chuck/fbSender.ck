@@ -30,6 +30,7 @@ envelope length
 
 // constants
 512 => int BUFFER_SIZE;
+50 => int maxDb;
 
 // --------------------------------------------------------------
 // osc out ------------------------------------------------------
@@ -81,7 +82,6 @@ in.listenAll();
 // microphone audio ---------------------------------------------
 // --------------------------------------------------------------
 
-Gain micGain;
 Gain gain[NUM_PIS];
 HPF hp[NUM_PIS];
 LPF lp[NUM_PIS];
@@ -99,39 +99,7 @@ float threshold[NUM_PIS];
 // FUNCTIONS
 // --------------------------------------------------------------
 
-// envelope follower
-fun void envelopeFollower(int i) {
-	// loops until the decibel limit is reached
-	while (running) {
-        //<<< senderState >>>;
-        // this loop is working UNTIL senderState gets updated once, then it gets stuck in block below
-        <<< "SENDING" >>>;
-        while (Std.rmstodb(pole[i].last()) < threshold[i]) {
-            // advance time while mic is below threshold val
-            1::samp => now;
-        }
-        <<< "Sound.", "" >>>;
-        
-        send(i); // send to one pi at a time
-        now => time past;
-        // keep sending until whole packet is sent
-        while (now < past + packetLength[i]) send(i);
-        //1::ms => now;
-	}
-	//1::ms => now;
-}
 
-// sends out audio in 512 sample blocks
-fun void send(int i) {
-	out[i].start(ADDRESS);
-
-	for (0 => int j; j < BUFFER_SIZE; j++) {
-		out[i].add(del[i].last());
-		1::samp => now;
-	}
-
-	out[i].send();
-}
 
 fun void endProgram() {
     <<< thisFile, "END PROGRAM" >>>;
@@ -165,15 +133,15 @@ fun void oscListener() {
 for (0 => int i; i < NUM_PIS; i++) {
     // sound chain
 	//SinOsc mic => gain[i] => res[i] => del[i] => blackhole;
-    adc.chan(0) => gain[i] => res[i] => del[i] => blackhole;
-    adc.chan(1) => gain[i];
+    adc => gain[i] => res[i] => del[i] => blackhole;
+    //adc.chan(1) => gain[i];
 	//mic => gain[i] => lp[i] => hp[i] => del[i] => blackhole;
 	//mic => gain[i] => del[i] => blackhole;
-	adc.chan(0) => pole[i] => blackhole;
-    adc.chan(1) => pole[i] => blackhole;
+	adc => pole[i] => blackhole;
+    //adc.chan(1) => pole[i] => blackhole;
 
 	// delay of adc
-	100::ms => delayLength[i];
+	500::ms => delayLength[i]; // 48000 / 512 = 93.75
 
 	// delay stuff
 	del[i].max(100::ms);
@@ -187,10 +155,13 @@ for (0 => int i; i < NUM_PIS; i++) {
 	0.9999 => pole[i].pole;
 
 	// thresholds in decibels
-	25 => threshold[i]; // started at 10, try going higher?
+	10 => threshold[i]; // started at 10, try going higher?
 
 	// this determines how much audio is send through in milliseconds
-	500::ms => packetLength[i];
+	500::ms => packetLength[i]; // started at 500
+    
+    // filter
+    1.0 => res[i].Q;
 }
 
 for (0 => int i; i < NUM_IPS; i++) {
@@ -205,6 +176,42 @@ for (0 => int i; i < NUM_IPS; i++) {
 	out[i].add(BUFFER_SIZE);
 	out[i].send();
 
+}
+
+// envelope follower
+fun void envelopeFollower(int idx) {
+    
+    while (running) {
+        
+        while ( (Std.rmstodb(pole[idx].last()) < threshold[idx]) || (Std.rmstodb(pole[idx].last()) > maxDb)) {
+            // advance time while mic is below threshold val (don't send anything)
+            1::samp => now;
+            <<< "below" >>>;
+        }
+        
+        <<< "ABOVE THRESH, Sound.", "" >>>;
+        
+        send(idx); // send to one pi at a time
+        now => time past;
+        // keep sending until whole packet is sent
+        while (now < past + packetLength[idx]) send(idx);
+        //1::ms => now;
+    }
+    //1::ms => now;
+}
+
+// sends out audio in 512 sample blocks
+fun void send(int idx) {
+    <<< "SENDING" >>>;
+    out[idx].start(ADDRESS);
+    
+    for (0 => int j; j < BUFFER_SIZE; j++) {
+        out[idx].add(del[idx].last());
+        
+        1::samp => now;
+    }
+    
+    out[idx].send();
 }
 
 // start OSC server

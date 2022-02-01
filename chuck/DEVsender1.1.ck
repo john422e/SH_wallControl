@@ -24,13 +24,13 @@ envelope length
 
 // ip addresses
 [
-"127.0.0.1"
-//"pione.local",
-//"pitwo.local"
-// "pithree.local",
-// "pifour.local",
-// "pifive.local",
-// "pisix.local",
+//"127.0.0.1"
+"pione.local"
+//"pitwo.local",
+//"pithree.local",
+//"pifour.local",
+//"pifive.local",
+//"pisix.local"
 // "piseven.local",
 // "pieight.local"
 ] @=> string IP[];
@@ -39,7 +39,7 @@ IP.size() => int NUM_IPS;
 IP.size() => int NUM_PIS;
 
 // port is the same for all outgoing messages
-10001 => int OUT_PORT;
+10000 => int OUT_PORT;
 
 // address is the same for all outgoing messages
 "/m" => string ADDRESS;
@@ -67,8 +67,6 @@ in.listenAll();
 
 Gain micGain;
 Gain gain[NUM_PIS];
-HPF hp[NUM_PIS];
-LPF lp[NUM_PIS];
 ResonZ res[NUM_PIS];
 Delay del[NUM_PIS];
 OnePole pole[NUM_PIS];
@@ -82,35 +80,7 @@ float threshold[NUM_PIS];
 // FUNCTIONS
 // --------------------------------------------------------------
 
-// envelope follower
-fun void envelopeFollower(int i) {
-	// loops until the decibel limit is reached
-	while (true) {
-		while (Std.rmstodb(pole[i].last()) < threshold[i]) {
-			1::samp => now;
-		}
-		<<< "Sound.", "" >>>;
-		
-		send(i);
-		now => time past;
-		
-		while (now < past + packetLength[i]) {
-			send(i);
-		}
-	}
-}
 
-// sends out audio in 512 sample blocks
-fun void send(int i) {
-	out[i].start(ADDRESS);
-	
-	for (0 => int j; j < BUFFER_SIZE; j++) {
-		out[i].add(del[i].last());
-		2::samp => now;
-	}
-	
-	out[i].send();
-}
 
 // --------------------------------------------------------------
 // initialize ---------------------------------------------------
@@ -118,10 +88,7 @@ fun void send(int i) {
 
 for (0 => int i; i < NUM_PIS; i++) {
 	// sound chain
-	//SinOsc mic => gain[i] => res[i] => del[i] => blackhole;
     adc => gain[i] => res[i] => del[i] => blackhole;
-	//mic => gain[i] => lp[i] => hp[i] => del[i] => blackhole;
-	//mic => gain[i] => del[i] => blackhole;
 	adc => pole[i] => blackhole;
 	
 	// delay of adc
@@ -131,18 +98,16 @@ for (0 => int i; i < NUM_PIS; i++) {
 	del[i].max(100::ms);
 	del[i].delay(100::ms);
 	
-	hp[i].freq(0.1);
-	lp[i].freq(10000.0);
-	
+
 	// following
 	3 => pole[i].op;
 	0.9999 => pole[i].pole;
 	
 	// thresholds in decibels
-	10 => threshold[i];
+	100 => threshold[i];
 	
 	// this determines how much audio is send through in milliseconds
-	500::ms => packetLength[i];
+	100::ms => packetLength[i];
 }
 
 for (0 => int i; i < NUM_IPS; i++) {
@@ -157,6 +122,36 @@ for (0 => int i; i < NUM_IPS; i++) {
 	out[i].add(BUFFER_SIZE);
 	out[i].send();
 	
+}
+
+// envelope follower
+fun void envelopeFollower(int i) {
+    // loops until the decibel limit is reached
+    while (true) {
+        while (Std.rmstodb(pole[i].last()) < threshold[i]) {
+            1::samp => now;
+        }
+        <<< "Sound.", "" >>>;
+        
+        send(i);
+        now => time past;
+        
+        while (now < past + packetLength[i]) {
+            send(i);
+        }
+    }
+}
+
+// sends out audio in 512 sample blocks
+fun void send(int i) {
+    out[i].start(ADDRESS);
+    
+    for (0 => int j; j < BUFFER_SIZE; j++) {
+        out[i].add(del[i].last());
+        1::samp => now;
+    }
+    
+    out[i].send();
 }
 
 // --------------------------------------------------------------
