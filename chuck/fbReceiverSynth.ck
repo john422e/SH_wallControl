@@ -30,9 +30,9 @@ Step st => Envelope stEnv => JCRev rev => Gain stGain => Dyno limiter => Pan2 st
 
 // CAN PLAY WITH THESE SETTINGS
 0.5 => rev.mix;
-0.7 => stGain.gain;
+0.3 => stGain.gain;
 limiter.limit();
-0.5 => limiter.thresh;
+0.2 => limiter.thresh;
 
 // constant
 512 => int bufferSize;
