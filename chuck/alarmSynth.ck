@@ -31,6 +31,8 @@ in.listenAll();
 SawOsc saw => Envelope env => dac.chan(1);
 Phasor ramp => blackhole;
 
+0.9 => dac.gain;
+
 // set freq
 440.0 => saw.freq;
 

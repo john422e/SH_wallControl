@@ -26,7 +26,7 @@ in.listenAll();
 // -----------------------------------------------------------------------------
 
 Step st => Envelope stEnv => JCRev rev => Gain stGain => Dyno limiter => Pan2 stPan => dac; // out to both chans?
-
+0.9 => dac.gain;
 
 // CAN PLAY WITH THESE SETTINGS
 0.5 => rev.mix;

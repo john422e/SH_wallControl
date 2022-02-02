@@ -44,9 +44,9 @@ envelope length
 "pithree.local",
 "pifour.local",
 "pifive.local",
-"pisix.local"
-//"piseven.local",
-//"pieight.local"
+"pisix.local",
+"piseven.local",
+"pieight.local"
 ] @=> string IP[];
 
 //[ "127.0.0.1" ] @=> string IP[];
