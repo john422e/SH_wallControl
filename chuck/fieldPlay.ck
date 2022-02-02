@@ -130,7 +130,7 @@ fun void setValsFromDistance(float dist) {
 
     // set these
     1.05 => float extBoost;
-    30.0 => float ampScaler;
+    20.0 => float ampScaler;
     15.0 => float qScaler; // NOT USING THIS RIGHT NOW
 
 
