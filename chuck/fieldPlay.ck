@@ -142,6 +142,7 @@ fun void setValsFromDistance(float dist) {
         for( 0 => int i; i < numSynths; i++ ) {
             if( synthStates[i] == 1 ) {
                 if( i == 1 ) {
+                    // SET FOR EXTERIORS ONLY
                     //<<< "BEFORE AMP", amp >>>;
                     amp*extBoost => amp; // double the amp for the exterior sounds (speakers)
                     //<<< "TRIPLED AMP", amp >>>;
@@ -151,6 +152,7 @@ fun void setValsFromDistance(float dist) {
                     spork ~ bufEnvs[i].keyOn();
                 }
                 else {
+                    // SET FOR INTERIORS ONLY
                     amp => gains[i].gain; // PROBABLY NEED TO SMOOTH THIS
                     //amp => filters[synth].gain;
                     amp => bufEnvs[i].target;
@@ -159,18 +161,20 @@ fun void setValsFromDistance(float dist) {
             }
             else { // go to min amp val
                 if( i == 1 ) {
+                    // EXTERIORS ONLY
                     // double everything for exterior sounds (speakers)
                     //10.0 => filters[synth].Q;
-                    (minAmp*2) => gains[i].gain;
+                    (minAmp*extBoost) => gains[i].gain;
                     //minAmp => filters[synth].gain;
-                    (minAmp*2) => bufEnvs[i].target;
+                    (minAmp*extBoost) => bufEnvs[i].target;
                 }
-
-                //10.0 => filters[synth].Q;
-                minAmp => gains[i].gain;
-                //minAmp => filters[synth].gain;
-                minAmp => bufEnvs[i].target;
-                spork ~ bufEnvs[i].keyOn();
+                else {
+                    // INTERIORS ONLY
+                    minAmp => gains[i].gain;
+                    //minAmp => filters[synth].gain;
+                    minAmp => bufEnvs[i].target;
+                    spork ~ bufEnvs[i].keyOn();
+                }
             }
         }
     }
