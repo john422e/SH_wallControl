@@ -19,6 +19,7 @@ cassia channels:
 // GLOBALS
 // -----------------------------------------------------------------------------
 
+"fieldPlay.ck" => string fn;
 1 => int running;
 int synth;
 0.2 => float minAmp;
@@ -98,7 +99,7 @@ fun void readInFile( SndBuf buf, string fn ) {
 
 fun void setSynthState( int synthNum, int state ) {
     state => synthStates[synthNum];
-    <<< "fieldPlay.ck BUF SYNTH STATES:", synthStates[0], synthStates[1] >>>;
+    <<< fn, "BUF SYNTH STATES:", synthStates[0], synthStates[1] >>>;
     if( synthStates[synthNum] == 1) {
         // set to minAmp and turn on
         minAmp => bufEnvs[synthNum].target;
