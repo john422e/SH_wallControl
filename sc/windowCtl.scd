@@ -1,7 +1,9 @@
+~localHost.sendMsg( "/heyhey", 8);
+~hosts[0].sendMsg( "/m", 0);
 (
 var wWidth=1700, wHeight=130, title="SOUND HOUSE";
 var netState, sensorState, sensorPingingState, ternaryState, pulseState, roomPitchState, fieldPlayState, feedbackState, alarmState, hybridState, shutdown;
-var modeButtons;
+var modeButtons, fbButtons;
 
 
 //-----------------------------------------------------------------------------------
@@ -49,8 +51,6 @@ netState = ListView(w, 200@70)
 			"pieight.local"
 		]}
 	);
-	// make a local host for mic sender
-	~localHost = ~makeLocalHost.();
 	// reset all buttons
 	modeButtons.do( {
 		arg butt, i;
@@ -286,13 +286,26 @@ feedbackState = Button(w, 170@30)
 			});
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
 			"FEEDBACK ON".postln;
+			// turn on pi receivers
+			//~setFeedbackReceivers.(1);
+			fbButtons.do( {
+				arg fbButt;
+				fbButt.valueAction_(1);
+			});
 			// turn on sender
 			~setLocalSender.(~localHost, 1);
+
 		},
 		{
 			// TURN OFF
 			// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
 			"FEEDBACK OFF".postln;
+			// turn off pi receivers
+			//~setFeedbackReceivers.(0);
+			fbButtons.do( {
+				arg fbButt;
+				fbButt.valueAction_(0);
+			});
 			// turn off sender
 			~setLocalSender.(~localHost, 0);
 	});
@@ -375,8 +388,33 @@ shutdown = Button(w, 200@30)
 	"SHUTTING DOWN REMOTE SERVER".postln;
 });
 
-// put all buttons in a list
+// put all mode buttons in a list
 modeButtons = [sensorState, sensorPingingState, pulseState, ternaryState, roomPitchState, fieldPlayState, feedbackState, alarmState, hybridState];
+
+// make buttons for individual FB state control
+fbButtons = Array.fill(8, {
+	arg i;
+	var newButt;
+	newButt = Button(w, 30@30)
+	.states_( [
+		[i, Color.black, Color.red],
+		[i, Color.black, Color.green]
+	])
+	.action_( {
+		arg butt;
+		if( butt.value == 1,
+			{
+				// TURN ON FB
+				format("FB % ON", i).postln;
+				~hosts[i].sendMsg("/fbReceiverState", 1);
+			},
+			{
+				// TURN OFF FB
+				format("FB % OFF", i).postln;
+				~hosts[i].sendMsg("/fbReceiverState", 0);
+		});
+	});
+});
 )
 ~hosts;
 ~localHost;

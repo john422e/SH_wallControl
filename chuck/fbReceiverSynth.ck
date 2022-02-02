@@ -9,7 +9,7 @@ expanding on Eric Heep's receiver.ck, 2015
 // GLOBALS
 // -----------------------------------------------------------------------------
 1 => int running;
-0 => int synthState;
+1 => int synthState; // DEFAULT TO ON SINCE IT WILL BE TURNED ON/OFF BY serverMaster.ck
 
 // -----------------------------------------------------------------------------
 // OSC
@@ -88,11 +88,6 @@ fun void oscListener() {
 // -----------------------------------------------------------------------------
 // MAIN LOOP
 // -----------------------------------------------------------------------------
-
-// GET RID OF WHEN FINISHED TESTING
-1 => synthState;
-
-
 
 spork ~ oscListener();
 

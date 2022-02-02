@@ -173,6 +173,15 @@
 };
 
 // FOR FEEDBACK MODE
+~setFeedbackReceivers = {
+	// DEPRICATED? using individual buttons for now due to segment faults
+	arg state=1;
+	~hosts.do( {
+		arg host, i;
+		host.sendMsg('/fbSynthState', state);
+	});
+};
+
 ~setLocalSender = {
 	arg host, state; // 0 or 1 off/on
 	host.sendMsg('/senderState', state);

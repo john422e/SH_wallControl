@@ -133,12 +133,12 @@ fun void oscListener() {
 for (0 => int i; i < NUM_PIS; i++) {
     // sound chain
 	//SinOsc mic => gain[i] => res[i] => del[i] => blackhole;
-    adc => gain[i] => res[i] => del[i] => blackhole;
-    //adc.chan(1) => gain[i];
+    adc.chan(0) => gain[i] => res[i] => del[i] => blackhole;
+    adc.chan(1) => gain[i];
 	//mic => gain[i] => lp[i] => hp[i] => del[i] => blackhole;
 	//mic => gain[i] => del[i] => blackhole;
-	adc => pole[i] => blackhole;
-    //adc.chan(1) => pole[i] => blackhole;
+	adc.chan(0) => pole[i] => blackhole;
+    adc.chan(1) => pole[i] => blackhole;
 
 	// delay of adc
 	500::ms => delayLength[i]; // 48000 / 512 = 93.75

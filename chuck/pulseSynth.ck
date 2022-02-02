@@ -7,13 +7,13 @@ for SH@theWende, 2022 - john eagle
 // GLOBALS
 // -----------------------------------------------------------------------------
 1 => int running;
+"pulseSynth.ck" => string fn;
 
 // -----------------------------------------------------------------------------
 // OSC
 // -----------------------------------------------------------------------------
 OscIn in;
 OscMsg msg;
-
 10000 => int port;
 port => in.port;
 in.listenAll();
@@ -41,7 +41,7 @@ for( 0 => int i; i < numSynths; i++ ) {
 // RECEIVER FUNC
 // -----------------------------------------------------------------------------
 fun void oscListener() {
-  <<< "pulseSynth.ck PULSE SYNTHS LISTENING ON PORT:", port >>>;
+  <<< fn, "PULSE SYNTHS LISTENING ON PORT:", port >>>;
   int synth;
   while( true ) {
     in => now; // wait for a message
@@ -78,4 +78,4 @@ while( running ) {
     1::second => now;
 }
 
-<<< "pulseSynth.ck stopping" >>>;
+<<< fn, "stopping" >>>;
