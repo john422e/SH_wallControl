@@ -22,7 +22,7 @@ cassia channels:
 "fieldPlay.ck" => string fn;
 1 => int running;
 int synth;
-0.2 => float minAmp;
+0.4 => float minAmp;
 
 // time/event tracking
 0 => int second_i;
@@ -134,7 +134,7 @@ fun void setValsFromDistance(float dist) {
     // set these
     1.05 => float extBoost;
     20.0 => float ampScaler;
-    1.0 => ampScaler; // TESTING
+    2.0 => ampScaler; // TESTING
     15.0 => float qScaler; // NOT USING THIS RIGHT NOW
 
 
