@@ -21,7 +21,7 @@ cassia channels:
 
 1 => int running;
 int synth;
-0.4 => float minAmp;
+0.2 => float minAmp;
 
 // time/event tracking
 0 => int second_i;
@@ -129,8 +129,8 @@ fun void setValsFromDistance(float dist) {
     30 => int distSmoother; // val to feed normalize because minAmp is > 0
 
     // set these
-    1.5 => float extBoost;
-    40.0 => float ampScaler;
+    1.05 => float extBoost;
+    30.0 => float ampScaler;
     15.0 => float qScaler; // NOT USING THIS RIGHT NOW
 
 
