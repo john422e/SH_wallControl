@@ -203,6 +203,8 @@ fun void oscListener() {
 
         // global synth state, arg = 0 or 1 for on/off
         if( msg.address == "/bufSynthState" ) setSynthState(synth, msg.getInt(1));
+        
+        if( msg.address == "/masterGain" ) msg.getFloat(0) => dac.gain;
 
         // end program
         if( msg.address == "/endProgram" ) endProgram();
@@ -229,6 +231,7 @@ fun void oscListener() {
             // filter
             if( msg.address == "/bufFilterFreq") msg.getFloat(1) => filters[synth].freq;
             if( msg.address == "/bufFilterQ") msg.getFloat(1) => filters[synth].Q;
+            
 
             // get sensor data
             if( msg.address == "/distance" ) setValsFromDistance(msg.getFloat(0));

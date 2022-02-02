@@ -37,6 +37,8 @@ for( 0 => int i; i < numSynths; i++ ) {
     1.0 => mods[i].freq; // default to 1 second pulse
 }
 
+0.9 => dac.gain;
+
 // -----------------------------------------------------------------------------
 // RECEIVER FUNC
 // -----------------------------------------------------------------------------
@@ -61,6 +63,9 @@ fun void oscListener() {
       if( msg.address == "/modFreq") msg.getFloat(1) => mods[synth].freq;
       // gain
       if( msg.address == "/pulseGain") msg.getFloat(1) => envs[synth].target;
+      
+      // master gain
+      if( msg.address == "/masterGain") msg.getFloat(0) => dac.gain;
       
       // end program
       if( msg.address == "/endProgram" ) 0 => running;

@@ -9,6 +9,7 @@ for SH@theWende, 2022 - john eagle
 // GLOBALS
 // -----------------------------------------------------------------------------
 1 => int running;
+"stdSynth.ck" => string fn;
 int synth;
 0.2 => float minAmp; // for sound level when NOT boosted with sensor
 
@@ -72,7 +73,7 @@ fun float normalize( float inVal, float x1, float x2 ) {
 
 fun void setSynthState( int synthNum, int state ) {
     state => synthStates[synthNum];
-    <<< "stdSynth.ck STD SYNTH STATES:", synthStates[0], synthStates[1] >>>;
+    <<< fn, "STD SYNTH STATES:", synthStates[0], synthStates[1] >>>;
     if( synthStates[synthNum] == 1) {
         // set to minAmp and turn on
         minAmp => synthEnvs[synthNum].target;
@@ -100,7 +101,7 @@ fun void setAmpFromDistance(float dist) {
     // turn on sound if value below thresh
     if( dist < thresh && dist > 0.0 ) {
         normalize(dist, thresh+distSmoother, distOffset) => amp;
-        <<< "stdSynth.ck sensorAmp", amp >>>;
+        <<< fn, "sensorAmp", amp >>>;
         // no synthNum comes in here, so have to check manually
         for( 0 => int i; i < numSynths; i++ ) {
             if( synthStates[i] == 1 ) {
@@ -123,7 +124,7 @@ fun void setAmpFromDistance(float dist) {
 }
 
 fun void endProgram() {
-    <<< "stdSynth.ck END PROGRAM" >>>;
+    <<< fn, "END PROGRAM" >>>;
     // ends loop and stops program
     0 => running;
 }
@@ -131,7 +132,7 @@ fun void endProgram() {
 
 // receiver func
 fun void oscListener() {
-  <<< "stdSynth.ck SYNTHS LISTENING ON PORT:", IN_PORT >>>;
+  <<< fn, "SYNTHS LISTENING ON PORT:", IN_PORT >>>;
   
   while( true ) {
     in => now; // wait for a message
@@ -145,6 +146,9 @@ fun void oscListener() {
         
         // end program
         if( msg.address == "/endProgram" ) endProgram();
+        
+        // master gain
+        if( msg.address == "/masterGain" ) msg.getFloat(0) => dac.gain;
         
         // ONLY CHECK IF SYNTH STATE IS ON
         if( synthStates[0] == 1 || synthStates[1] == 1 ) {

@@ -9,6 +9,7 @@ for SH@theWende, 2022 - john eagle
 // -----------------------------------------------------------------------------
 
 1 => int running;
+"alarmSynth.ck" => string fn;
 // 0 or 1 for alarm on/off
 1 => int alarmState;
 
@@ -53,7 +54,7 @@ fun void pulse(SawOsc s, Phasor p, Envelope e, float freq, float index, float pu
 
 // receiver func
 fun void oscListener() {
-    <<< "alarmSynth.ck ALARM LISTENING ON PORT:", IN_PORT >>>;
+    <<< fn, "ALARM LISTENING ON PORT:", IN_PORT >>>;
     int synth;
     while( running ) {
         in => now; // wait for a message
@@ -67,6 +68,7 @@ fun void oscListener() {
             if( msg.address == "/alarmOff") 0 => alarmState;
             // set alarm gain with float
             if( msg.address == "/alarmGain") msg.getFloat(1) => env.target;
+            if( msg.address == "/masterGain") msg.getFloat(0) => dac.gain;
             // end program
             if( msg.address == "/endProgram" ) 0 => running;
         }
@@ -86,5 +88,5 @@ while( running ) {
 
 // turn everything off
 env.keyOff();
-<<< "alarmSynth.ck stopping" >>>;
+<<< fn, "stopping" >>>;
 1::second => now;

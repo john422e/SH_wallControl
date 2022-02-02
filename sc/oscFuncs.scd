@@ -1,3 +1,4 @@
+~hosts[0].sendMsg("/synthOn", 1);
 (
 // -----------------------------------------------------
 // OSC FUNCTIONS
@@ -26,6 +27,14 @@
 	~hosts.do( {
 		arg host, i;
 		host.sendMsg( address, synth, vals[i]);
+	});
+};
+
+~setMasterGain = {
+	arg val;
+	~hosts.do( {
+		arg host, i;
+		host.sendMsg( "/masterGain", val);
 	});
 };
 
@@ -148,7 +157,7 @@
 	arg update=true, synthNum=1; // default to on (1) and speaker ( synth1 1)
 	var updates, gain;
 	// address, synthnum, state, seed (0-7)
-	if( update == true, { updates=Array.fill(8, {1}); gain=3.0}, { updates=Array.fill(8, {0}); gain=1.0});
+	if( update == true, { updates=Array.fill(8, {1}); gain=0.2}, { updates=Array.fill(8, {0}); gain=0.2});
 	~hosts.do( {
 		arg host, i;
 		// set

@@ -8,8 +8,8 @@
 
 // connect MIDI devices
 MIDIIn.connectAll;
-//MIDIFunc.trace(true);
-MIDIFunc.trace(false);
+MIDIFunc.trace(true);
+//MIDIFunc.trace(false);
 // run this so that MIDI controller will update list (set ctlOffset for any 7 sliders in a row and sendCtl for button)
 ~chain = Array.fill(7, { 0 } ); // 0 = down
 ~primePair = [3/2, 5/4];
@@ -44,6 +44,7 @@ MIDIdef.cc( \ternaryCtl, {
 				{
 					var synthNum = 1, gain=0.2; // change this if needed
 					// compute freqs and send
+					ternaryState.valueAction_(1);
 					~ternaryFreqs = ~setFreqsFromChain.(~chain, ~primePair);
 					~ternaryFreqs.postln;
 					// add network send function here
@@ -53,6 +54,15 @@ MIDIdef.cc( \ternaryCtl, {
 			);
 
 			// add a control for ternary mode on/off here
+	});
+});
+
+MIDIdef.cc( \bpCtl, {
+	// ctl 42
+	arg val, num, chan, src;
+	var ctlOffset=0, sendCtl=41;
+	if( num == 42, {
+		roomPitchState.valueAction_(1);
 	});
 });
 )

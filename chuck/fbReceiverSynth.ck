@@ -9,17 +9,23 @@ expanding on Eric Heep's receiver.ck, 2015
 // GLOBALS
 // -----------------------------------------------------------------------------
 1 => int running;
+"fbReceiverSynth.ck" => string fn;
 1 => int synthState; // DEFAULT TO ON SINCE IT WILL BE TURNED ON/OFF BY serverMaster.ck
 
 // -----------------------------------------------------------------------------
 // OSC
 // -----------------------------------------------------------------------------
-OscIn in;
-OscMsg msg;
+OscIn inData;
+OscIn inSound;
+OscMsg msgData;
+OscMsg msgSound;
 
-10000 => int port;
-port => in.port;
-in.listenAll();
+10000 => int dataPort;
+dataPort => inData.port;
+10001 => int soundPort;
+soundPort => inSound.port;
+inData.listenAll();
+inSound.listenAll();
 
 // -----------------------------------------------------------------------------
 // AUDIO
@@ -41,23 +47,35 @@ limiter.limit();
 // RECEIVER FUNC
 // -----------------------------------------------------------------------------
 
-fun void oscListener() {
-    <<< "fbReceiverSynth.ck FB RECEIVER SYNTH LISTENING ON PORT:", port >>>;
-    while (true) {
-        in => now;
-        while (in.recv(msg)) {
+fun void oscListenerData() {
+    <<< fn, "FB RECEIVER SYNTH LISTENING FOR DATA ON PORT:", dataPort >>>;
+    while (running) {
+        inData => now;
+        while (inData.recv(msgData)) {
+            <<< fn, "DATA", msgData.address >>>;
             // set synthState
-            if( msg.address == "/fbSynthState" ) {
-                <<< msg.address, msg.getInt(0) >>>;
-                msg.getInt(0) => synthState;
+            if( msgData.address == "/fbSynthState" ) {
+                <<< msgData.address, msgData.getInt(0) >>>;
+                msgData.getInt(0) => synthState;
             };
+            if( msgData.address == "/masterGain") msgData.getFloat(0) => dac.gain;
             // end program
-            if( msg.address == "/endProgram" ) 0 => running;
+            if( msgData.address == "/endProgram" ) 0 => running;
+            1::samp => now;
+        }
+    }
+}
 
+fun void oscListenerSound() {
+    <<< fn, "FB RECEIVER SYNTH LISTENING FOR SOUND ON PORT:", soundPort >>>;
+    while( running) {
+        inSound => now;
+        while( inSound.recv(msgSound)) {
+            <<< fn, "SOUND", msgSound.address >>>;
             // ONLY CHECK IF synthState == 1
             if( synthState == 1 ) {
                 // receive packet of audio samples
-                if (msg.address == "/m") {
+                if (msgSound.address == "/m") {
                     <<< "received sound" >>>;
 
                     // turn it on
@@ -66,7 +84,7 @@ fun void oscListener() {
 
                     // start the sample playback
                     for (0 => int i; i < bufferSize; i++) {
-                        msg.getFloat(i) => st.next;
+                        msgSound.getFloat(i) => st.next;
                         1::samp => now;
                     }
 
@@ -75,8 +93,8 @@ fun void oscListener() {
                     stEnv.keyOff();
                 }
 
-                if (msg.address == "/bufferSize") {
-                    msg.getInt(0) => bufferSize;
+                if (msgSound.address == "/bufferSize") {
+                    msgSound.getInt(0) => bufferSize;
                     <<< "Buffer size set to", bufferSize, "" >>>;
                 }
             }
@@ -89,10 +107,11 @@ fun void oscListener() {
 // MAIN LOOP
 // -----------------------------------------------------------------------------
 
-spork ~ oscListener();
+spork ~ oscListenerData();
+spork ~ oscListenerSound();
 
 while( running ) {
     1::second => now;
 }
 
-<<< "fbReceiverSynth.ck stopping" >>>;
+<<< fn, "stopping" >>>;

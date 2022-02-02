@@ -47,15 +47,15 @@ envelope length
 "pisix.local",
 "piseven.local",
 "pieight.local"
-] @=> string IP[];
+] @=> string IPs[];
 
-//[ "127.0.0.1" ] @=> string IP[];
+[ "127.0.0.1" ] @=> string IP[];
 
 IP.size() => int NUM_IPS;
 IP.size() => int NUM_PIS;
 
 // port is the same for all outgoing messages
-10000 => int OUT_PORT;
+10001 => int OUT_PORT;
 
 // address is the same for all outgoing messages
 "/m" => string ADDRESS;
@@ -222,5 +222,7 @@ spork ~ oscListener();
 // --------------------------------------------------------------
 
 while (running) {
+    out[0].start("/m");
+    out[0].send;
 	1::second => now;
 }

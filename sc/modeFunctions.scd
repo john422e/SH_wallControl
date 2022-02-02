@@ -7,7 +7,7 @@
 // TERNARY MODE
 ~setFreqsFromChain = {
 	arg chain, primePair;
-	var baseFreq = 100, primes = [primePair[0], primePair[1], 1/primePair[0], 1/primePair[1]], thisFreq, polars, directions, orientation, freqs=Array.new(8), muls;
+	var baseFreq = 120.0, primes = [primePair[0], primePair[1], 1/primePair[0], 1/primePair[1]], thisFreq, polars, directions, orientation, freqs=Array.new(8), muls;
 	freqs.add(baseFreq);
 	//freqs.postln;
 	polars = ['N', 'E', 'S', 'W'];
@@ -41,6 +41,7 @@
 				freq * (9/8);
 			});
 	});
+	format("FREQS %", freqs).postln;
 	// return freqs
 	freqs;
 };
@@ -147,7 +148,20 @@
 			// choose only exteriors
 			listCopy = ~sfFiles.copyRange(0, ~sfFiles.size-1);
 			listCopy.removeAt(listCopy.size-1);
+
+
+
+			// TROUBLESHOOT AMP LEVELS HERE, ITERATE THROUGH EACH SET OF FIELD RECORDINGS
+
+			// each one seems ok, but maybe need to narrow randFilter range
+
 			category = listCopy.choose;
+			//category = listCopy[2];
+
+
+
+
+
 		},
 		{
 			// else it's interiors (grab the last batch only)
