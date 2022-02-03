@@ -80,6 +80,7 @@ fun void setSynthState( int synthNum, int state ) {
         synthEnvs[synthNum].keyOn();
     }
     else synthEnvs[synthNum].keyOff();
+    1::second => now;
 }
 
 fun void setSynthGain( float amp, int synthNum ) {
