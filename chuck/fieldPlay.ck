@@ -277,7 +277,7 @@ fun void bufChange( BPF bpf, Envelope env, Gain gain, float q ) {
     // pick random freq for BPF
     Math.random2f(250.0, 1000.0) => bpf.freq;
     5.0 => env.target;
-    1.5 => gain.gain;
+    1.25 => gain.gain;
     
     <<< bpf.freq(), bpf.Q() >>>;
     // turn back on
