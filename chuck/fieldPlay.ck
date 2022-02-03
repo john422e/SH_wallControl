@@ -112,7 +112,7 @@ fun void setSynthState( int synthNum, int state ) {
 
 fun void setRandUpdates(int synthNum, int randState, int seed) {
     randState => randFilterUpdates[synthNum]; // 0 or 1
-    <<< "fieldPlay.ck RAND UPDATES SET:", synthNum, randFilterUpdates[synthNum] >>>;
+    <<< fn, "RAND UPDATES SET:", synthNum, randFilterUpdates[synthNum] >>>;
     Math.srandom(seed); // set seed based on pi num
     // if 1, do a change right away
 
@@ -123,7 +123,7 @@ fun void setRandUpdates(int synthNum, int randState, int seed) {
 
 fun void setValsFromDistance(float dist) {
     // NOT GONNA USE THIS FOR NOW
-    <<< "fieldPlay.ck /distance", dist >>>;
+    <<< fn, "/distance", dist >>>;
     // sensor vars
     150.0 => float thresh;
     10.0 => float distOffset;
@@ -253,20 +253,24 @@ fun void bufChange( BPF bpf, Envelope env, Gain gain, float q ) {
 spork ~ oscListener();
 
 while( running ) {
-    // check for update state on synth 1
-    if( randFilterUpdates[0] && (second_i % eventInterval == 0) ) {
-        Math.random2(0, 1) => eventTrigger;
-        <<< "fieldPlay.ck 0 EVENT TRIGGER:", eventTrigger >>>;
-        if( eventTrigger ) {
-            spork ~ bufChange(filters[0], bufEnvs[0], gains[0], 10.0); // higher Q for transducer
+    if( synthStates[0]) {
+        // check for update state on synth 1
+        if( randFilterUpdates[0] && (second_i % eventInterval == 0) ) {
+            Math.random2(0, 1) => eventTrigger;
+            <<< "fieldPlay.ck 0 EVENT TRIGGER:", eventTrigger >>>;
+            if( eventTrigger ) {
+                spork ~ bufChange(filters[0], bufEnvs[0], gains[0], 10.0); // higher Q for transducer
+            }
         }
     }
-    // check for update state on synth 2
-    if( randFilterUpdates[1] && (second_i % eventInterval == 0) ) {
-        Math.random2(0, 1) => eventTrigger;
-        <<< "fieldPlay.ck 1 EVENT TRIGGER:", eventTrigger >>>;
-        if( eventTrigger ) {
-            spork ~ bufChange(filters[1], bufEnvs[1], gains[1], 5.0); // lower Q for speaker
+    if( synthStates[1]) {
+        // check for update state on synth 2
+        if( randFilterUpdates[1] && (second_i % eventInterval == 0) ) {
+            Math.random2(0, 1) => eventTrigger;
+            <<< "fieldPlay.ck 1 EVENT TRIGGER:", eventTrigger >>>;
+            if( eventTrigger ) {
+                spork ~ bufChange(filters[1], bufEnvs[1], gains[1], 5.0); // lower Q for speaker
+            }
         }
     }
     // advance time
