@@ -276,7 +276,7 @@ fun void bufChange( BPF bpf, Envelope env, float q ) {
     q => bpf.Q;
     // pick random freq for BPF
     Math.random2f(250.0, 1000.0) => bpf.freq;
-    2.0 => env.target;
+    2.5 => env.target;
     <<< bpf.freq(), bpf.Q() >>>;
     // turn back on
     env.keyOn();
