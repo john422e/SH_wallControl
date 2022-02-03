@@ -126,7 +126,6 @@ fun void setValsFromDistance(float dist) {
     // sensor vars
     150.0 => float thresh;
     10.0 => float distOffset;
-    float amp;
     float qVal;
 
     30 => int distSmoother; // val to feed normalize because minAmp is > 0
@@ -134,14 +133,13 @@ fun void setValsFromDistance(float dist) {
     // set these
     1.05 => float extBoost;
     20.0 => float ampScaler;
-    2.0 => ampScaler; // TESTING
     15.0 => float qScaler; // NOT USING THIS RIGHT NOW
 
 
     // turn on sound if value below thresh
     if( dist < thresh && dist > 0.0 ) {
-        normalize(dist, thresh+distSmoother, distOffset) * ampScaler => amp;
-        <<< "fieldPlay.ck sensorAmp", amp >>>;
+        normalize(dist, distOffset, thresh+distSmoother) * qScaler => qVal;
+        <<< fn, "qVal", qVal >>>;
         // no synthNum comes in here, so have to check manually
         for( 0 => int i; i < numSynths; i++ ) {
             if( synthStates[i] == 1 ) {
