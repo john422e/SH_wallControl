@@ -60,9 +60,9 @@ for( 0 => int i; i < numSynths; i++ ) {
   // set filters
   filters[i].set(500.0, 0.58); // default filter settings (change freq?)
   // set compressor settings
-  comps[i].compress();
-  0.7 => comps[i].thresh;
-  20.0 => comps[i].ratio;
+  //comps[i].compress();
+  //0.7 => comps[i].thresh;
+  //20.0 => comps[i].ratio;
 }
 
 0.9 => dac.gain;
@@ -276,6 +276,7 @@ fun void bufChange( BPF bpf, Envelope env, float q ) {
     q => bpf.Q;
     // pick random freq for BPF
     Math.random2f(250.0, 1000.0) => bpf.freq;
+    2.0 => env.target;
     <<< bpf.freq(), bpf.Q() >>>;
     // turn back on
     env.keyOn();
