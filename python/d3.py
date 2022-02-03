@@ -119,4 +119,5 @@ if __name__ == "__main__":
 
     print(fn, "EXITING")
     # properly close the system
+    GPIO.cleanup()
     osc_terminate()
