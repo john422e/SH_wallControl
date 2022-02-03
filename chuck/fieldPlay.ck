@@ -118,7 +118,7 @@ fun void setRandUpdates(int synthNum, int randState, int seed) {
 
     // TRYING WITHOUT THIS, REENABLE IF TOO WEIRD
 
-    if( randFilterUpdates[synthNum] == 1) spork ~ bufChange(filters[synthNum], bufEnvs[synthNum], 5.0);
+    if( randFilterUpdates[synthNum] == 1) spork ~ bufChange(filters[synthNum], bufEnvs[synthNum], gains[synthNum], 5.0);
 }
 
 fun void setValsFromDistance(float dist) {
@@ -266,7 +266,7 @@ fun void bufPlayLoop( SndBuf buf, Envelope env ) {
 }
 
 // initiate random change in BPF
-fun void bufChange( BPF bpf, Envelope env, float q ) {
+fun void bufChange( BPF bpf, Envelope env, Gain gain, float q ) {
     <<< "fieldPlay.ck CHANGING BPF STATE" >>>;
     // turn off
     env.keyOff();
@@ -276,7 +276,9 @@ fun void bufChange( BPF bpf, Envelope env, float q ) {
     q => bpf.Q;
     // pick random freq for BPF
     Math.random2f(250.0, 1000.0) => bpf.freq;
-    10.0 => env.target;
+    5.0 => env.target;
+    1.5 => gain.gain;
+    
     <<< bpf.freq(), bpf.Q() >>>;
     // turn back on
     env.keyOn();
@@ -295,7 +297,7 @@ while( running ) {
         Math.random2(0, 1) => eventTrigger;
         <<< "fieldPlay.ck 0 EVENT TRIGGER:", eventTrigger >>>;
         if( eventTrigger ) {
-            spork ~ bufChange(filters[0], bufEnvs[0], 10.0); // higher Q for transducer
+            spork ~ bufChange(filters[0], bufEnvs[0], gains[0], 10.0); // higher Q for transducer
         }
     }
     // check for update state on synth 2
@@ -303,7 +305,7 @@ while( running ) {
         Math.random2(0, 1) => eventTrigger;
         <<< "fieldPlay.ck 1 EVENT TRIGGER:", eventTrigger >>>;
         if( eventTrigger ) {
-            spork ~ bufChange(filters[1], bufEnvs[1], 5.0); // lower Q for speaker
+            spork ~ bufChange(filters[1], bufEnvs[1], gains[1], 5.0); // lower Q for speaker
         }
     }
     // advance time
