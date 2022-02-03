@@ -30,7 +30,7 @@ envelope length
 
 // constants
 512 => int BUFFER_SIZE;
-50 => int maxDb;
+100 => int maxDb;
 
 // --------------------------------------------------------------
 // osc out ------------------------------------------------------
@@ -47,9 +47,9 @@ envelope length
 "pisix.local",
 "piseven.local",
 "pieight.local"
-] @=> string IPs[];
+] @=> string IP[];
 
-[ "127.0.0.1" ] @=> string IP[];
+//[ "127.0.0.1" ] @=> string IP[];
 
 IP.size() => int NUM_IPS;
 IP.size() => int NUM_PIS;
@@ -66,17 +66,6 @@ OscOut out[NUM_PIS];
 // determines our packet length for outgoing messages
 dur packetLength[NUM_PIS];
 
-// --------------------------------------------------------------
-// osc in -------------------------------------------------------
-// --------------------------------------------------------------
-
-OscIn in;
-OscMsg msg;
-
-// the port for the incoming messages
-7400 => int IN_PORT;
-IN_PORT => in.port;
-in.listenAll();
 
 // --------------------------------------------------------------
 // microphone audio ---------------------------------------------
@@ -100,43 +89,18 @@ float threshold[NUM_PIS];
 // --------------------------------------------------------------
 
 
-
-fun void endProgram() {
-    <<< thisFile, "END PROGRAM" >>>;
-    // ends loop and stops program
-    0 => running;
-}
-
-// receiver function -> everything is triggered from this
-fun void oscListener() {
-  <<< thisFile, "FEEDBACK SENDER LISTENING ON PORT:", IN_PORT >>>;
-
-  while( true ) {
-    in => now; // wait for a message
-    while( in.recv(msg)) {
-        //<<< thisFile, msg.address, msg.getInt(0) >>>;
-
-        // global state, arg = 0 or 1 for on/off
-        if( msg.address == "/senderState" ) msg.getInt(0) => senderState;
-
-        // end program
-        if( msg.address == "/endProgram" ) endProgram();
-
-    }
-  }
-}
-
 // --------------------------------------------------------------
 // initialize ---------------------------------------------------
 // --------------------------------------------------------------
 
 for (0 => int i; i < NUM_PIS; i++) {
     // sound chain
-	//SinOsc mic => gain[i] => res[i] => del[i] => blackhole;
+	//SinOsc mic => gain[i] => res[i] => del[i] => blackhole;  // for testing 
+    //mic => pole[i] => blackhole; // for testing
+    //adc => gain[i] => res[i] => del[i] => blackhole;
+    //adc => gain[i];
     adc.chan(0) => gain[i] => res[i] => del[i] => blackhole;
     adc.chan(1) => gain[i];
-	//mic => gain[i] => lp[i] => hp[i] => del[i] => blackhole;
-	//mic => gain[i] => del[i] => blackhole;
 	adc.chan(0) => pole[i] => blackhole;
     adc.chan(1) => pole[i] => blackhole;
 
@@ -155,7 +119,7 @@ for (0 => int i; i < NUM_PIS; i++) {
 	0.9999 => pole[i].pole;
 
 	// thresholds in decibels
-	10 => threshold[i]; // started at 10, try going higher?
+	1 => threshold[i]; // started at 10, try going higher?
 
 	// this determines how much audio is send through in milliseconds
 	500::ms => packetLength[i]; // started at 500
@@ -186,7 +150,7 @@ fun void envelopeFollower(int idx) {
         while ( (Std.rmstodb(pole[idx].last()) < threshold[idx]) || (Std.rmstodb(pole[idx].last()) > maxDb)) {
             // advance time while mic is below threshold val (don't send anything)
             1::samp => now;
-            <<< "below" >>>;
+            //<<< "below" >>>;
         }
         
         <<< "ABOVE THRESH, Sound.", "" >>>;
@@ -208,14 +172,17 @@ fun void send(int idx) {
     for (0 => int j; j < BUFFER_SIZE; j++) {
         out[idx].add(del[idx].last());
         
-        1::samp => now;
+        //1::samp => now;
+        2::samp => now; // for 24000 srate
     }
     
     out[idx].send();
 }
 
-// start OSC server
-spork ~ oscListener();
+
+// Start it up
+<<< thisFile, "SENDING ON PORT:", OUT_PORT >>>;
+
 
 // --------------------------------------------------------------
 // loop forever
