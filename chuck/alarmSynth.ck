@@ -45,9 +45,10 @@ Phasor rampSlow => blackhole;
 
 
 fun void pulse(SawOsc s, Phasor p, Envelope e, float freq, float index, float pulseRate) {
+    0.6 => env.target;
     e.keyOn();
     pulseRate => p.freq;
-    0.6 => env.target;
+    
     while( alarmState ) {
         freq + (p.last() * index) => s.freq;
         1::samp => now;
