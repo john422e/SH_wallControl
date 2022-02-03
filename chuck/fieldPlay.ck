@@ -140,45 +140,6 @@ fun void setValsFromDistance(float dist) {
     if( dist < thresh && dist > 0.0 ) {
         normalize(dist, distOffset, thresh+distSmoother) * qScaler => qVal;
         <<< fn, "qVal", qVal >>>;
-        // no synthNum comes in here, so have to check manually
-        for( 0 => int i; i < numSynths; i++ ) {
-            if( synthStates[i] == 1 ) {
-                if( i == 1 ) {
-                    // SET FOR EXTERIORS ONLY
-                    //<<< "BEFORE AMP", amp >>>;
-                    amp*extBoost => amp; // double the amp for the exterior sounds (speakers)
-                    //<<< "TRIPLED AMP", amp >>>;
-                    amp => gains[i].gain; // PROBABLY NEED TO SMOOTH THIS
-                    //amp => filters[synth].gain;
-                    amp => bufEnvs[i].target;
-                    spork ~ bufEnvs[i].keyOn();
-                }
-                else {
-                    // SET FOR INTERIORS ONLY
-                    amp => gains[i].gain; // PROBABLY NEED TO SMOOTH THIS
-                    //amp => filters[synth].gain;
-                    amp => bufEnvs[i].target;
-                    spork ~ bufEnvs[i].keyOn();
-                }
-            }
-            else { // go to min amp val
-                if( i == 1 ) {
-                    // EXTERIORS ONLY
-                    // double everything for exterior sounds (speakers)
-                    //10.0 => filters[synth].Q;
-                    (minAmp*extBoost) => gains[i].gain;
-                    //minAmp => filters[synth].gain;
-                    (minAmp*extBoost) => bufEnvs[i].target;
-                }
-                else {
-                    // INTERIORS ONLY
-                    minAmp => gains[i].gain;
-                    //minAmp => filters[synth].gain;
-                    minAmp => bufEnvs[i].target;
-                    spork ~ bufEnvs[i].keyOn();
-                }
-            }
-        }
     }
 }
 
@@ -211,7 +172,7 @@ fun void oscListener() {
         if( synthStates[0] == 1 || synthStates[1] == 1 ) {
             // all messages should have an address for event type
             // first arg should always be an int (0 or 1) specifying synth
-            <<< "fieldPlay.ck", msg.address >>>;
+            //<<< fn, msg.address >>>;
 
             // buf init (read in file)
             if( msg.address == "/bufRead") readInFile(bufs[synth], msg.getString(1));
@@ -232,7 +193,7 @@ fun void oscListener() {
             
 
             // get sensor data
-            //if( msg.address == "/distance" ) setValsFromDistance(msg.getFloat(0));
+            if( msg.address == "/distance" ) setValsFromDistance(msg.getFloat(0));
         }
     }
   }
