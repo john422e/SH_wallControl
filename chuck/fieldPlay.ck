@@ -26,7 +26,7 @@ int synth;
 
 // time/event tracking
 0 => int second_i;
-5 => int eventInterval; // in seconds
+20 => int eventInterval; // in seconds
 [0, 0] @=> int randFilterUpdates[];
 int eventTrigger;
 
@@ -122,6 +122,7 @@ fun void setRandUpdates(int synthNum, int randState, int seed) {
 }
 
 fun void setValsFromDistance(float dist) {
+    // NOT GONNA USE THIS FOR NOW
     <<< "fieldPlay.ck /distance", dist >>>;
     // sensor vars
     150.0 => float thresh;
@@ -194,7 +195,7 @@ fun void oscListener() {
             
 
             // get sensor data
-            if( msg.address == "/distance" ) setValsFromDistance(msg.getFloat(0));
+            //if( msg.address == "/distance" ) setValsFromDistance(msg.getFloat(0));
         }
     }
   }
