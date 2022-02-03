@@ -142,7 +142,7 @@ fun void oscListener() {
         msg.getInt(0) => synth;
         
         // global synth state, arg = 0 or 1 for on/off
-        if( msg.address == "/stdSynthState" ) spork ~ setSynthState(synth, msg.getInt(1));
+        if( msg.address == "/stdSynthState" ) setSynthState(synth, msg.getInt(1));
         
         // end program
         if( msg.address == "/endProgram" ) endProgram();
