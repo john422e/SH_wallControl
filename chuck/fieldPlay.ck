@@ -22,11 +22,11 @@ cassia channels:
 "fieldPlay.ck" => string fn;
 1 => int running;
 int synth;
-0.4 => float minAmp;
+0.9 => float minAmp;
 
 // time/event tracking
 0 => int second_i;
-20 => int eventInterval; // in seconds
+5 => int eventInterval; // in seconds
 [0, 0] @=> int randFilterUpdates[];
 int eventTrigger;
 
@@ -234,7 +234,7 @@ fun void oscListener() {
             
 
             // get sensor data
-            if( msg.address == "/distance" ) setValsFromDistance(msg.getFloat(0));
+            //if( msg.address == "/distance" ) setValsFromDistance(msg.getFloat(0));
         }
     }
   }
@@ -275,7 +275,7 @@ fun void bufChange( BPF bpf, Envelope env, float q ) {
     //10.0 => bpf.Q;
     q => bpf.Q;
     // pick random freq for BPF
-    Math.random2f(200, 1500.0) => bpf.freq;
+    Math.random2f(250.0, 1000.0) => bpf.freq;
     <<< bpf.freq(), bpf.Q() >>>;
     // turn back on
     env.keyOn();
