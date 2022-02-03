@@ -11,7 +11,7 @@ for SH@theWende, 2022 - john eagle
 1 => int running;
 "alarmSynth.ck" => string fn;
 // 0 or 1 for alarm on/off
-1 => int alarmState;
+int alarmState;
 
 // -----------------------------------------------------------------------------
 // OSC
@@ -29,8 +29,10 @@ in.listenAll();
 // -----------------------------------------------------------------------------
 
 // synth defs
+SawOsc sawSlow => Envelope envSlow => dac.chan(0);
 SawOsc saw => Envelope env => dac.chan(1);
 Phasor ramp => blackhole;
+Phasor rampSlow => blackhole;
 
 0.9 => dac.gain;
 
@@ -64,6 +66,7 @@ fun void oscListener() {
                 1 => alarmState;
                 msg.getFloat(1) => env.target;
                 spork ~ pulse(saw, ramp, env, 440.0, 200.0, 2.0);
+                spork ~ pulse(sawSlow, rampSlow, 440.0, 300.0, 8.0);
             }
             if( msg.address == "/alarmOff") 0 => alarmState;
             // set alarm gain with float
