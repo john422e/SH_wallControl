@@ -101,5 +101,3 @@ r.play;
 
 )
 
-a = "asdf";
-"Hello {}".format(a).postln;

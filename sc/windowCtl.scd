@@ -1,11 +1,11 @@
-~hosts[0].sendMsg("/m", 0.4);
-
 (
 var wWidth=1700, wHeight=150, title="SOUND HOUSE";
 var netView, buttonsRowsView, modeButtonsView, fbButtonsView, gainView;
 var netState, sensorState, sensorPingingState, ternaryState, pulseState, roomPitchState, fieldPlayState, feedbackState, alarmState, hybridState, shutdown;
 var modeButtons, fbButtons, gainCtl, masterGain;
 var resetAll, turnOffOtherModes;
+
+~modeBlock = false; // use for ternary mode and room pitch mode to block a change to another mode
 
 // RESET FUNCTION
 resetAll = {
@@ -46,8 +46,8 @@ w.drawFunc = {
 	// add fbSender
 	fbSenderButton = Button()
 	.states_( [
-		["FB SENDER IS ON", Color.black, Color.red],
-		["FB SENDER IS OFF", Color.black, Color.green]
+		["FB SENDER IS OFF", Color.black, Color.red],
+		["FB SENDER IS ON", Color.black, Color.green]
 	])
 	.action_( {
 		arg butt;
@@ -55,10 +55,12 @@ w.drawFunc = {
 			{
 				// TURN ON FB SENDER
 				"TURNING ON LOCAL FB SENDER".postln;
+				~setLocalSender.(~localHost, 1);
 			},
 			{
 				// TURN OFF FB SENDER
 				"TURNING OFF LOCAL FB SENDER".postln;
+				~setLocalSender.(~localHost, 0);
 			}
 		);
 	});
@@ -154,7 +156,7 @@ netView.layout_( VLayout(
 		w.refresh;
 	}),
 
-	// 8. SHUTDOWN BUTTON
+	// SHUTDOWN BUTTON
 	shutdown = Button()
 	.states_([
 		["SHUTDOWN REMOTE SERVER", Color.black, Color.cyan]
@@ -175,13 +177,17 @@ netView.layout_( VLayout(
 
 modeButtonsView.layout_( HLayout());
 
+//-----------------------------------------------------------------------------------
+// STATE BUTTONS
+//-----------------------------------------------------------------------------------
+
 modeButtons = [
 
 	// 1. SENSOR PROGRAM STATE
 	sensorState = Button()
 	.states_([
-		["SENSOR PRGM IS ON ", Color.black, Color.red],
-		["SENSOR PRGM IS OFF", Color.black, Color.green]
+		["SENSOR PRGM IS OFF", Color.black, Color.red],
+		["SENSOR PRGM IS ON ", Color.black, Color.green]
 	])
 	.action_( {
 		arg butt;
@@ -253,6 +259,8 @@ modeButtons = [
 						// activate sensor button if not already
 						if( sensorPingingState.value == 0, { sensorPingingState.valueAction_(1) });
 						~sendSines.(~ternaryFreqs, synthNum, 1, gain);
+
+						~modeBlock = true;
 					},
 					{
 						// TURN OFF
@@ -260,6 +268,8 @@ modeButtons = [
 						if( sensorPingingState.value == 1, { sensorPingingState.valueAction_(0) });
 						~turnSinesOff.(0); // turn off both synths
 						~turnSinesOff.(1);
+
+						~modeBlock = false;
 				});
 			},
 			{
@@ -291,6 +301,8 @@ modeButtons = [
 						// get random freqs
 						freqs = ~getRoomPitches.();
 						~sendSines.(freqs, synthNum, 2, gain); // try 2 harmonic synth?
+
+						~modeBlock = true;
 					},
 					{
 						// TURN OFF
@@ -298,6 +310,8 @@ modeButtons = [
 						if( sensorPingingState.value == 1, { sensorPingingState.valueAction_(0) });
 						~turnSinesOff.(0); // turn off both synths
 						~turnSinesOff.(1);
+
+						~modeBlock = false;
 				});
 			},
 			{
@@ -316,33 +330,25 @@ modeButtons = [
 	.action_( {
 		arg butt;
 		// ONLY ACTIVATE IF SENSORS ARE ALREADY TURNED ON
-		if( sensorState.value == 1,
+
+		if( butt.value == 1,
 			{
-				if( butt.value == 1,
-					{
-						// TURN ON
-						turnOffOtherModes.(butt, modeButtons);
-						// INSERT FUNC HERE
-						// activate sensor button if not already
-						if( sensorPingingState.value == 0, { sensorPingingState.valueAction_(1) });
-						~turnFieldPlayOn.(~getSoundFiles.("interiors"), 0);
-						~turnFieldPlayOn.(~getSoundFiles.("exteriors"), 1);
-						~setFieldPlayRandUpdates.(true, 0);
-						~setFieldPlayRandUpdates.(true, 1);
-					},
-					{
-						// TURN OFF
-						// deactivate sensor button if not already
-						if( sensorPingingState.value == 1, { sensorPingingState.valueAction_(0) });
-						~setFieldPlayRandUpdates.(false, 0);
-						~setFieldPlayRandUpdates.(false, 1);
-						~turnFieldPlayOff.(0);
-						~turnFieldPlayOff.(1);
-				});
+				// TURN ON
+				turnOffOtherModes.(butt, modeButtons);
+				// INSERT FUNC HERE
+				// activate sensor button if not already
+
+				~turnFieldPlayOn.(~getSoundFiles.("interiors"), 0);
+				~turnFieldPlayOn.(~getSoundFiles.("exteriors"), 1);
+				~setFieldPlayRandUpdates.(true, 0);
+				~setFieldPlayRandUpdates.(true, 1);
 			},
 			{
-				"TURN SENSORS ON FIRST".postln;
-				butt.value_(0);
+				// TURN OFF
+				~setFieldPlayRandUpdates.(false, 0);
+				~setFieldPlayRandUpdates.(false, 1);
+				~turnFieldPlayOff.(0);
+				~turnFieldPlayOff.(1);
 		});
 		["FIELDPLAY STATE:", butt.value].postln;
 	}),
@@ -366,7 +372,7 @@ modeButtons = [
 				~setFeedbackReceivers.(1);
 				fbButtonsView.children.do( { arg fbButt; fbButt.valueAction_(1); });
 				// turn on sender
-				~setLocalSender.(~localHost, 1);
+				//~setLocalSender.(~localHost, 1);
 
 			},
 			{
@@ -377,7 +383,7 @@ modeButtons = [
 				~setFeedbackReceivers.(0);
 				fbButtonsView.children.do( { arg fbButt; fbButt.valueAction_(0); });
 				// turn off sender
-				~setLocalSender.(~localHost, 0);
+				//~setLocalSender.(~localHost, 0);
 		});
 		["FEEDBACK STATE:", butt.value].postln;
 	}),
@@ -399,10 +405,16 @@ modeButtons = [
 				~wallAlarms = ~getAlarmWalls.(numAlarms); // ~wallAlarms needs to be global to be turned off later
 				~wallAlarms.postln;
 				~turnAlarmOn.(~wallAlarms);
+
+				~modeBlock = true;
 			},
 			{
 				// TURN OFF
 				~turnAlarmOff.(~wallAlarms);
+
+				~modeBlock = false;
+				// turn on fieldPlay when deactivating alarm
+				//fieldPlayState.valueAction_(1);
 		});
 		["ALARM STATE:", butt.value].postln;
 	}),
@@ -461,10 +473,44 @@ masterGain = Slider.new()
 // add master gain slider
 gainView.layout.add(masterGain);
 
+gainView.layout.add(
+	Button()
+	.states_([
+		["TM OFF", Color.black, Color.cyan]
+	])
+	.action_( {
+		arg butt;
+		~turnSinesOff.(1);
+	});
+);
 
-//-----------------------------------------------------------------------------------
-// STATE BUTTONS
-//-----------------------------------------------------------------------------------
+gainView.layout.add(
+	Button()
+	.states_([
+		["RM OFF", Color.black, Color.cyan]
+	])
+	.action_( {
+		arg butt;
+		~turnSinesOff.(0);
+	});
+);
+
+gainView.layout.add(
+	Button()
+	.states_([
+		["FP OFF", Color.black, Color.cyan]
+	])
+	.action_( {
+		arg butt;
+		// TURN OFF
+		~setFieldPlayRandUpdates.(false, 0);
+		~setFieldPlayRandUpdates.(false, 1);
+		~turnFieldPlayOff.(0);
+		~turnFieldPlayOff.(1);
+	});
+);
+
+
 
 //-----------------------------------------------------------------------------------
 // MIDI
@@ -500,6 +546,7 @@ MIDIdef.cc( \ternaryCtl, {
 			{ (val > 10) && (val < 117) } { 1 };
 			//~chain[ctl].postln;
 			~chain.postln;
+			~ternaryFreqs = ~setFreqsFromChain.(~chain, ~primePair);
 		}
 	);
 	if( (num == sendCtl) && (val==127),
@@ -534,4 +581,98 @@ MIDIdef.cc( \bpCtl, {
 			}.defer;
 	});
 });
+
+
+//-----------------------------------------------------------------------------------
+// CLOCK
+//-----------------------------------------------------------------------------------
+
+
+// GLOBAL TIME VARS
+~shifts = 8;
+~minutes = 20;
+~currentState = "";
+
+
+
+// SHIFT CLOCK ROUTINE
+r = Routine {
+	~shifts.do{
+		// iterate for # of shifts
+		arg i;
+		var minuteDivisions=4;
+		var eventCounter=0, events = ~getEventTimes.();
+		var waitTime = 60/minuteDivisions;
+
+		["EVENTS THIS SHIFT", events].postln;
+
+
+		(~minutes*minuteDivisions).do{
+			// iterate for every time division of a minute
+			arg j;
+			var time=(j/minuteDivisions);
+			//time.postln;
+
+			// CHECK FOR EVENT
+			if( time == events[eventCounter][0], {
+				var thisEvent=events[eventCounter][1];
+				//[eventCounter, events.size].postln;
+				format("MODE CHANGE: %, TIME: %", thisEvent, time).postln;
+				//[time, thisEvent].postln;
+				~currentState = thisEvent;
+				thisEvent.postln;
+				// put logic for updating functions here
+
+				if( thisEvent == "shift change",
+					{
+						{pulseState.valueAction_(1)}.defer;
+				});
+				if( thisEvent == "fieldplay",
+					{
+						if( ~modeBlock == false,
+							{{ fieldPlayState.valueAction_(1) }.defer },
+							{ format("DID NOT TRIGGER % DUE TO TM OR RM", thisEvent).postln }
+						);
+				});
+				if( thisEvent == "FB",
+					{
+						if( ~modeBlock == false,
+							{{ feedbackState.valueAction_(1) }.defer },
+							{ format("DID NOT TRIGGER % DUE TO TM OR RM", thisEvent).postln }
+						);
+				});
+				if( thisEvent == "alarm",
+					{
+						if( ~modeBlock == false,
+							{{ alarmState.valueAction_(1) }.defer },
+							{ format("DID NOT TRIGGER % DUE TO TM OR RM", thisEvent).postln }
+						);
+				});
+
+
+				// iterate
+				if( eventCounter < (events.size-1), { eventCounter = eventCounter + 1 });
+			});
+
+			// POST TIME/STATE UPDATE EVERY MINUTE
+			if( time.mod(1) == 0, {
+				format("SCORE LOG: shift: % time: %:00., current state: %", i, time.asInteger, ~currentState).postln;
+				//["SHIFT:", i, "MINUTES:", time.asInteger, "CURRENT STATE:", ~currentState].postln;
+			},
+			{
+				format("SCORE LOG: time: %:% seconds", time.asInteger, (time*60).mod(60).asInteger).postln;
+				//["TIME:", time.mod(1).round(1).asInteger, (time*60).asInteger].postln;
+			});
+
+			// WAIT
+			waitTime.wait;
+			//0.25.wait;
+
+		};
+	};
+};
 )
+
+// RUN IT
+r.play;
+r.stop;

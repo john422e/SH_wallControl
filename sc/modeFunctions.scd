@@ -4,10 +4,48 @@
 
 
 (
+
+// FUNCTION FOR GENERATING EVENTS DURING EACH SHIFT
+~getEventTimes = {
+	var time, shiftDur=20, shiftEndBuffer=1.5, pulseRange = [1.5, 2.5], pulseDur, numModes=4, modes=Array.new(numModes), alarmEvent=0.5.coin, returnList=Array.new(numModes+2); // numModes= # of modes in a shift (excl. shift change + alarm), must be even num
+	pulseDur = rrand(pulseRange[0], pulseRange[1]).round(0.25);
+	//pulseDur.postln;
+	// fill modes list;
+	if( alarmEvent, {
+		//"ALARM ADDED".postln;
+		modes = Array.new(numModes+1);
+		modes.add("alarm");
+	}); // resize modes and add alarm
+	// add fieldplay
+	(numModes/2).do( { modes.add("fieldplay") });
+	// add FB
+	(numModes/2).do( { modes.add("FB") });
+
+	// add shift change/pulse at the beginning every time
+	returnList.add( [0.0, "shift change"]);
+
+	time = pulseDur; // set current time to end of pulseDur
+	while( {time < (shiftDur-shiftEndBuffer)} ) {
+		var thisMode, modeRange = [2.5, 6.0], modeDur;
+		thisMode = modes.choose; // select a mode
+		modes.remove(thisMode); // remove it from available modes
+		if( thisMode == "alarm", { modeDur = 2.0 }, { modeDur = rrand(modeRange[0], modeRange[1]).round(0.25) });
+		//["TIME:", time, "NEW MODE:", thisMode].postln;
+
+		// add to returnList
+		returnList.add( [time, thisMode]);
+		// advance time
+		time = time + modeDur;
+	};
+	// return
+	format("SHIFT EVENTS: %", returnList).postln;
+	returnList; // [ [time, mode], .... ]
+};
+
 // TERNARY MODE
 ~setFreqsFromChain = {
 	arg chain, primePair;
-	var baseFreq = 120.0, primes = [primePair[0], primePair[1], 1/primePair[0], 1/primePair[1]], thisFreq, polars, directions, orientation, freqs=Array.new(8), muls;
+	var baseFreq = 140.0, primes = [primePair[0], primePair[1], 1/primePair[0], 1/primePair[1]], thisFreq, polars, directions, orientation, freqs=Array.new(8), muls;
 	freqs.add(baseFreq);
 	//freqs.postln;
 	polars = ['N', 'E', 'S', 'W'];
@@ -33,7 +71,7 @@
 		orientation = directions[chainVal]; // set new orientation
 	});
 	// now make sure it's in range
-	while( { freqs.minItem < 100.0 },
+	while( { freqs.minItem < 140.0 },
 		{
 			["TOO LOW", freqs.minItem].postln;
 			freqs = freqs.collect( {
@@ -88,7 +126,7 @@
 
 // PITCH ROOM/BLUEPRINT
 ~getRoomPitches = {
-	var minFreq=110.0, maxFreq=500.0;
+	var minFreq=200.0, maxFreq=400.0;
 	var lowFreq = rrand(minFreq, maxFreq);
 	var minInterval=1.04, maxInterval=1.2;
 	var freqs=Array.new(8), intervals;

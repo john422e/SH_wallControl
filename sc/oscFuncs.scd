@@ -1,4 +1,4 @@
-~hosts[0].sendMsg("/synthOn", 1);
+
 (
 // -----------------------------------------------------
 // OSC FUNCTIONS
@@ -13,7 +13,7 @@
 };
 
 ~makeLocalHost = {
-	arg hostname = "127.0.0.1", port=7400;
+	arg hostname = "127.0.0.1", port=10000;
 	var host;
 	host = NetAddr.new( hostname, port);
 	host;
@@ -34,6 +34,7 @@
 	arg val;
 	~hosts.do( {
 		arg host, i;
+		format("SETTING MASTER GAIN %", val).postln;
 		host.sendMsg( "/masterGain", val);
 	});
 };
@@ -104,6 +105,14 @@
 		// turn off synth state
 		host.sendMsg( '/stdSynthState', synthNum, 0);
 		host.sendMsg( '/synthOff', synthNum); // turn off
+		//Routine {
+
+			//1.wait;
+			// do it again to catch stragglers
+			//"2nd off".postln;
+			//host.sendMsg( '/stdSynthState', synthNum, 0);
+			//host.sendMsg( '/synthOff', synthNum); // turn off
+		//}.play;
 	});
 };
 
@@ -193,16 +202,21 @@
 
 ~setLocalSender = {
 	arg host, state; // 0 or 1 off/on
-	host.sendMsg('/senderState', state);
+	if( host.isNil == false,
+		{host.sendMsg('/fbSenderState', state)},
+		{"NO HOST YET".postln;}
+	);
 };
 
 // FOR ALARM MODE: GET WALLS AND TURN ON THOSE (2 or 3)
 ~turnAlarmOn = {
-	arg wallChoices, gain=0.2;
+	arg wallChoices, gain=0.15;
 	wallChoices.do( {
 		arg wallNum;
 		if( ~hosts.size == 8,
 			{
+				// send to both? for funsies?
+				~hosts[wallNum].sendMsg( '/alarmOn', 0, gain);
 				~hosts[wallNum].sendMsg( '/alarmOn', 1, gain);
 			},
 			{

@@ -44,7 +44,7 @@ MIDIdef.cc( \ternaryCtl, {
 				{
 					var synthNum = 1, gain=0.2; // change this if needed
 					// compute freqs and send
-					ternaryState.valueAction_(1);
+					//ternaryState.valueAction_(1);
 					~ternaryFreqs = ~setFreqsFromChain.(~chain, ~primePair);
 					~ternaryFreqs.postln;
 					// add network send function here
@@ -62,7 +62,8 @@ MIDIdef.cc( \bpCtl, {
 	arg val, num, chan, src;
 	var ctlOffset=0, sendCtl=41;
 	if( num == 42, {
-		roomPitchState.valueAction_(1);
+		num.postln;
+		//roomPitchState.valueAction_(1);
 	});
 });
 )
