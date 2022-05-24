@@ -589,7 +589,7 @@ MIDIdef.cc( \bpCtl, {
 
 
 // GLOBAL TIME VARS
-~shifts = 8;
+~shifts = 10; // need 9, an extra just to be safe
 ~minutes = 20;
 ~currentState = "";
 
@@ -672,6 +672,20 @@ r = Routine {
 	};
 };
 )
+
+
+
+// MAKE SURE TO LOAD:
+// 0. turn on amphetamine and do not disturb, and setup tmux session, login to all pis
+// 1. modeFunctions.scd
+// 2. oscFunctions.scd
+// 3. windowCtl.scd
+// 4. start local server: chuck localServer.ck --srate:44100
+// 5. start pi servers: chuck serverMaster.ck --srate:22050 --caution-to-the-wind
+// 6. select PERFORMANCE MODE in GUI
+// 7. START SHOW AT 6:40pm below with r.play
+
+
 
 // RUN IT
 r.play;

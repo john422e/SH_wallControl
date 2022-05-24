@@ -31,8 +31,8 @@ inSound.listenAll();
 // AUDIO
 // -----------------------------------------------------------------------------
 
-Step st => Envelope stEnv => JCRev rev => Gain stGain => Dyno limiter => Pan2 stPan => dac;
-//Step st => Envelope stEnv => Gain stGain => Dyno limiter => JCRev rev => Pan2 stPan => dac; // put rev later in chain
+//Step st => Envelope stEnv => JCRev rev => Gain stGain => Dyno limiter => Pan2 stPan => dac;
+Step st => Envelope stEnv => Gain stGain => Dyno limiter => JCRev rev => Pan2 stPan => dac; // put rev later in chain
 0.9 => dac.gain;
 
 // CAN PLAY WITH THESE SETTINGS
