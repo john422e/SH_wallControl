@@ -61,10 +61,14 @@ Gain makeUpGains[numSynths];
 
 for( 0 => int i; i < numSynths; i++ ) {
   bufs[i] => bufEnvs[i] => filters[i] => makeUpGains[i] => limiters[i] => dac.chan(i);
+  
+  // crank the gain
+  90.0 => makeUpGains[i].gain;
   // set filters
   filters[i].set(500.0, 0.58); // default filter settings (change freq?)
-  limiter.limit();
-  90.0 => makeUpGain.gain;
+  // turn on limiter
+  limiters[i].limit();
+  
   // set compressor settings
   //comps[i].compress();
   //0.7 => comps[i].thresh;
