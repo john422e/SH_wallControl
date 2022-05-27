@@ -273,6 +273,7 @@ fun void bufChange( BPF bpf, Envelope env, Gain gain, OnePole follower) {
     while( aboveThresh) {
         if( follower.last() > 0.9 ) {
             gain.gain() * 0.95 => gainLevel;
+            <<< "BRINGING DOWN GAIN", gain.gain() >>>;
             gainLevel => gain.gain;
             1::ms => now;
         }
