@@ -21,7 +21,8 @@ Machine.add(dir + "stdSynth.ck");
 
 <<< "STARTING FIELDPLAY SYNTH" >>>;
 // fieldplay mode
-Machine.add(dir + "fieldPlay.ck");
+Machine.add(dir + "testField1.0.ck");
+//Machine.add(dir + "fieldPlay.ck");
 
 <<< "STARTING ALARM SYNTH" >>>;
 // alarm mode
