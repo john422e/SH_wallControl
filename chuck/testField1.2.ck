@@ -71,8 +71,9 @@ for( 0 => int i; i < numSynths; i++ ) {
   // turn on limiter
   limiters[i].limit();
   0.9 => limiters[i].thresh;
+  2.0 => limiters[i].ratio;
   // compensate for gain loss
-  3.5 => limiters[i].gain;
+  //3.5 => limiters[i].gain;
   limEnvs[i].keyOn();
 }
 
