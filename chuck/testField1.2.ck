@@ -65,7 +65,7 @@ for( 0 => int i; i < numSynths; i++ ) {
   bufs[i] => bufEnvs[i] => filters[i] => makeUpGains[i] => limiters[i] => limEnvs[i] => dac.chan(i);
 
   // crank the gain
-  90.0 => makeUpGains[i].gain;
+  60.0 => makeUpGains[i].gain;
   // set filters
   filters[i].set(500.0, 0.58); // default filter settings (change freq?)
   // turn on limiter
@@ -210,7 +210,7 @@ fun void oscListener() {
             
 
             // get sensor data
-            if( msg.address == "/distance" ) setValsFromDistance(msg.getFloat(0));
+            //if( msg.address == "/distance" ) setValsFromDistance(msg.getFloat(0));
         }
     }
   }
