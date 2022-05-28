@@ -62,7 +62,7 @@ OnePole followers[numSynths];
 
 for( 0 => int i; i < numSynths; i++ ) {
   bufs[i] => bufEnvs[i] => filters[i] => makeUpGains[i] => limiters[i] => dac.chan(i);
-  followers[i] => blackhole;
+  makeUpGains[i] => followers[i] => blackhole;
   // set gain to be squared (testing)
   3 => makeUpGains[i].op;
   // set pole position
