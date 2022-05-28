@@ -70,9 +70,9 @@ for( 0 => int i; i < numSynths; i++ ) {
   filters[i].set(500.0, 0.58); // default filter settings (change freq?)
   // turn on limiter
   limiters[i].limit();
-  0.9 => limiters[i].thresh;
-  3.5 => limiters[i].slopeBelow;
-  0.2 => limiters[i].slopeAbove;
+  //0.9 => limiters[i].thresh;
+  //3.5 => limiters[i].slopeBelow;
+  //0.2 => limiters[i].slopeAbove;
   // compensate for gain loss
   3.5 => limiters[i].gain;
   limEnvs[i].keyOn();
