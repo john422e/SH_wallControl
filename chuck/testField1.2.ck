@@ -23,6 +23,7 @@ cassia channels:
 1 => int running;
 int synth;
 0.9 => float minAmp;
+float freqHolder;
 
 // time/event tracking
 0 => int second_i;
@@ -141,15 +142,15 @@ fun void setValsFromDistance(float dist) {
 
     // set these
     //20.0 => float ampScaler;
-    4.0 => float freqScaler;
+    2.0 => float freqScaler;
 
 
     // turn on sound if value below thresh
     if( dist < thresh && dist > 0.0 ) {
         normalize(dist, thresh+distSmoother, distOffset) * freqScaler => freqVal;
         <<< fn, "freqVal", freqVal >>>;
-        (filters[0].freq() * freqScaler) => filters[0].freq;
-        (filters[1].freq() * freqScaler) => filters[1].freq;
+        (freqHolder * freqScaler) => filters[0].freq;
+        (freqHolder * freqScaler) => filters[1].freq;
         <<< fn, "freqVal", filters[0].freq() >>>;
     }
 }
@@ -250,7 +251,8 @@ fun void bufChange( BPF bpf, Envelope env, Gain gain) {
     //10.0 => bpf.Q;
     q => bpf.Q;
     // pick random freq for BPF
-    Math.random2f(250.0, 800.0) => bpf.freq;
+    Math.random2f(250.0, 800.0) => freqHolder;
+    freqHolder => bpf.freq;
     5.0 => env.target;
     //1.25 => gain.gain;
     
