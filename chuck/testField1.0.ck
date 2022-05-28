@@ -274,7 +274,7 @@ fun void bufChange( BPF bpf, Envelope env, Gain gain, OnePole follower) {
     // TESTING ENV FOLLOWER TO SET GAIN LEVEL
     while( aboveThresh == 1) {
         <<< "CHECKING FOLLOWER" >>>;
-        if( follower.last() > 0.1 ) {
+        if( follower.last() > 0.01 ) {
             gain.gain() * 0.95 => gainLevel;
             <<< "BRINGING DOWN GAIN", gain.gain() >>>;
             gainLevel => gain.gain;
