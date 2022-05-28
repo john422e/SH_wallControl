@@ -68,7 +68,7 @@ for( 0 => int i; i < numSynths; i++ ) {
   filters[i].set(500.0, 0.58); // default filter settings (change freq?)
   // turn on limiter
   limiters[i].limit();
-  0.8 => limiters[i].thresh;
+  0.1 => limiters[i].thresh;
 }
 
 0.9 => dac.gain;
