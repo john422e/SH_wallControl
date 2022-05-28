@@ -72,7 +72,7 @@ for( 0 => int i; i < numSynths; i++ ) {
   limiters[i].limit();
   0.9 => limiters[i].thresh;
   // compensate for gain loss
-  2 => limiters[i].gain;
+  2.5 => limiters[i].gain;
   limEnvs[i].keyOn();
 }
 
