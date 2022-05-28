@@ -147,7 +147,7 @@ fun void setValsFromDistance(float dist) {
 
     // turn on sound if value below thresh
     if( dist < thresh && dist > 0.0 ) {
-        normalize(dist, distOffset, thresh+distSmoother) * qScaler => qVal;
+        normalize(dist, thresh+distSmoother, distOffset) * qScaler => qVal;
         <<< fn, "qVal", qVal >>>;
         (qVal+2) => filters[1].Q;
     }
