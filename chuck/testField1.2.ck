@@ -149,6 +149,7 @@ fun void setValsFromDistance(float dist) {
     if( dist < thresh && dist > 0.0 ) {
         normalize(dist, thresh+distSmoother, distOffset) * qScaler => qVal;
         <<< fn, "qVal", qVal >>>;
+        (qVal+2) => filters[0].Q;
         (qVal+2) => filters[1].Q;
     }
 }
