@@ -66,7 +66,7 @@ for( 0 => int i; i < numSynths; i++ ) {
   // set gain to be squared (testing)
   3 => makeUpGains[i].op;
   // set pole position
-  0.99 => limiters[i].pole;
+  0.99 => followers[i].pole;
   
   // crank the gain
   //90.0 => makeUpGains[i].gain;
