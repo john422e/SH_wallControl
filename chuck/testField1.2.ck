@@ -140,9 +140,8 @@ fun void setValsFromDistance(float dist) {
     30 => int distSmoother; // val to feed normalize because minAmp is > 0
 
     // set these
-    1.05 => float extBoost;
-    20.0 => float ampScaler;
-    15.0 => float qScaler; // NOT USING THIS RIGHT NOW
+    //20.0 => float ampScaler;
+    15.0 => float qScaler;
 
 
     // turn on sound if value below thresh
@@ -151,6 +150,7 @@ fun void setValsFromDistance(float dist) {
         <<< fn, "qVal", qVal >>>;
         (qVal+2) => filters[0].Q;
         (qVal+2) => filters[1].Q;
+        <<< fn, "qVal", filters[0].Q() >>>;
     }
 }
 
@@ -250,7 +250,7 @@ fun void bufChange( BPF bpf, Envelope env, Gain gain) {
     //10.0 => bpf.Q;
     q => bpf.Q;
     // pick random freq for BPF
-    Math.random2f(250.0, 1000.0) => bpf.freq;
+    Math.random2f(250.0, 800.0) => bpf.freq;
     5.0 => env.target;
     //1.25 => gain.gain;
     
