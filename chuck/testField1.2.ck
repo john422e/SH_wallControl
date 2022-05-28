@@ -265,7 +265,7 @@ fun void bufChange( BPF bpf, Envelope env, Gain gain) {
     env.keyOn();
     50::ms => now;
     // crank the gain
-    90.0 => gain.gain;
+    //90.0 => gain.gain;
     
 
 }
