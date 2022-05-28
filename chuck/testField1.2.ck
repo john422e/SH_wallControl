@@ -203,7 +203,7 @@ fun void oscListener() {
             
 
             // get sensor data
-            //if( msg.address == "/distance" ) setValsFromDistance(msg.getFloat(0));
+            if( msg.address == "/distance" ) setValsFromDistance(msg.getFloat(0));
         }
     }
   }
