@@ -135,22 +135,22 @@ fun void setValsFromDistance(float dist) {
     // sensor vars
     150.0 => float thresh;
     10.0 => float distOffset;
-    float qVal;
+    float freqVal;
 
     30 => int distSmoother; // val to feed normalize because minAmp is > 0
 
     // set these
     //20.0 => float ampScaler;
-    15.0 => float qScaler;
+    4.0 => float freqScaler;
 
 
     // turn on sound if value below thresh
     if( dist < thresh && dist > 0.0 ) {
-        normalize(dist, thresh+distSmoother, distOffset) * qScaler => qVal;
-        <<< fn, "qVal", qVal >>>;
-        (qVal+2) => filters[0].Q;
-        (qVal+2) => filters[1].Q;
-        <<< fn, "qVal", filters[0].Q() >>>;
+        normalize(dist, thresh+distSmoother, distOffset) * freqScaler => freqVal;
+        <<< fn, "freqVal", freqVal >>>;
+        (filters[0].freq() * freqScaler) => filters[0].freq;
+        (filters[1].freq() * freqScaler) => filters[1].freq;
+        <<< fn, "freqVal", filters[0].freq() >>>;
     }
 }
 
