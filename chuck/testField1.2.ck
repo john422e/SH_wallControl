@@ -65,7 +65,7 @@ for( 0 => int i; i < numSynths; i++ ) {
   bufs[i] => bufEnvs[i] => filters[i] => makeUpGains[i] => limiters[i] => limEnvs[i] => dac.chan(i);
 
   // crank the gain
-  60.0 => makeUpGains[i].gain;
+  90.0 => makeUpGains[i].gain;
   // set filters
   filters[i].set(500.0, 0.58); // default filter settings (change freq?)
   // turn on limiter
@@ -258,7 +258,7 @@ fun void bufChange( BPF bpf, Envelope env, Gain gain) {
     // pick random freq for BPF
     Math.random2f(250.0, 800.0) => freqHolder;
     freqHolder => bpf.freq;
-    5.0 => env.target;
+    //5.0 => env.target;
     //1.25 => gain.gain;
     
     <<< bpf.freq(), bpf.Q() >>>;  
