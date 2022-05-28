@@ -245,7 +245,7 @@ fun void bufChange( BPF bpf, Envelope env, Gain gain) {
     env.keyOff();
     50::ms => now;
     // make sure Q is at a high value
-    Math.random2f(3.0, 12.0) => q;
+    Math.random2f(5.0, 12.0) => q;
     //10.0 => bpf.Q;
     q => bpf.Q;
     // pick random freq for BPF
