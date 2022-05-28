@@ -276,6 +276,7 @@ fun void bufChange( BPF bpf, Envelope env, Gain gain, OnePole follower) {
     
     // turn back on
     env.keyOn();
+    50::ms => now;
     // TESTING ENV FOLLOWER TO SET GAIN LEVEL
     while( aboveThresh == 1) {
         <<< "CHECKING FOLLOWER", follower.last() >>>;
@@ -287,8 +288,7 @@ fun void bufChange( BPF bpf, Envelope env, Gain gain, OnePole follower) {
         }
         else 0 => aboveThresh;
     }
-    
-    //50::ms => now;
+
 }
 
 // -----------------------------------------------------------------------------
