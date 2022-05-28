@@ -69,12 +69,6 @@ for( 0 => int i; i < numSynths; i++ ) {
   // turn on limiter
   limiters[i].limit();
   0.8 => limiters[i].thresh;
-  
-  
-  // set compressor settings
-  //comps[i].compress();
-  //0.7 => comps[i].thresh;
-  //20.0 => comps[i].ratio;
 }
 
 0.9 => dac.gain;
@@ -130,7 +124,7 @@ fun void setRandUpdates(int synthNum, int randState, int seed) {
 
     // TRYING WITHOUT THIS, REENABLE IF TOO WEIRD
 
-    if( randFilterUpdates[synthNum] == 1) spork ~ bufChange(filters[synthNum], bufEnvs[synthNum], makeUpGains[synthNum], followers[synthNum]);
+    if( randFilterUpdates[synthNum] == 1) spork ~ bufChange(filters[synthNum], bufEnvs[synthNum], makeUpGains[synthNum]);
 }
 
 fun void setValsFromDistance(float dist) {
@@ -240,7 +234,7 @@ fun void bufPlayLoop( SndBuf buf, Envelope env ) {
 
 
 // initiate random change in BPF
-fun void bufChange( BPF bpf, Envelope env, Gain gain, OnePole follower) {
+fun void bufChange( BPF bpf, Envelope env, Gain gain) {
     <<< "fieldPlay.ck CHANGING BPF STATE" >>>;
     
     float q;
@@ -257,28 +251,10 @@ fun void bufChange( BPF bpf, Envelope env, Gain gain, OnePole follower) {
     5.0 => env.target;
     //1.25 => gain.gain;
     
-    <<< bpf.freq(), bpf.Q() >>>;
-    
-    
-    
-    1 => int aboveThresh;
-    30.0 => float gainLevel;
-    gainLevel => gain.gain;
-    
+    <<< bpf.freq(), bpf.Q() >>>;  
     // turn back on
     env.keyOn();
     50::ms => now;
-    // TESTING ENV FOLLOWER TO SET GAIN LEVEL
-    while( aboveThresh == 1) {
-        <<< "CHECKING FOLLOWER", follower.last() >>>;
-        if( follower.last() > 0.01 ) {
-            gain.gain() * 0.95 => gainLevel;
-            <<< "BRINGING DOWN GAIN", gain.gain() >>>;
-            gainLevel => gain.gain;
-            1::ms => now;
-        }
-        else 0 => aboveThresh;
-    }
 
 }
 
@@ -295,7 +271,7 @@ while( running ) {
             Math.random2(0, 1) => eventTrigger;
             <<< "fieldPlay.ck 0 EVENT TRIGGER:", eventTrigger >>>;
             if( eventTrigger ) {
-                spork ~ bufChange(filters[0], bufEnvs[0], makeUpGains[0], followers[0]); // higher Q for transducer
+                spork ~ bufChange(filters[0], bufEnvs[0], makeUpGains[0]); // higher Q for transducer
             }
         }
     }
@@ -305,7 +281,7 @@ while( running ) {
             Math.random2(0, 1) => eventTrigger;
             <<< "fieldPlay.ck 1 EVENT TRIGGER:", eventTrigger >>>;
             if( eventTrigger ) {
-                spork ~ bufChange(filters[1], bufEnvs[1], makeUpGains[1], followers[0]); // lower Q for speaker
+                spork ~ bufChange(filters[1], bufEnvs[1], makeUpGains[1]); // lower Q for speaker
             }
         }
     }
