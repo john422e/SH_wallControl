@@ -54,6 +54,7 @@ Envelope bufEnvs[numSynths];
 Dyno limiters[numSynths];
 BPF filters[numSynths];
 Gain makeUpGains[numSynths];
+Envelope limEnvs[numSynths];
 
 // sound chains
 
@@ -61,10 +62,9 @@ Gain makeUpGains[numSynths];
 
 
 for( 0 => int i; i < numSynths; i++ ) {
-  bufs[i] => bufEnvs[i] => filters[i] => makeUpGains[i] => limiters[i] => dac.chan(i);
+  bufs[i] => bufEnvs[i] => filters[i] => makeUpGains[i] => limiters[i] => limEnvs[i] => dac.chan(i);
 
-  // crank the gain
-  90.0 => makeUpGains[i].gain;
+  
   // set filters
   filters[i].set(500.0, 0.58); // default filter settings (change freq?)
   // turn on limiter
@@ -72,6 +72,7 @@ for( 0 => int i; i < numSynths; i++ ) {
   0.9 => limiters[i].thresh;
   // compensate for gain loss
   2 => limiters[i].gain;
+  limEnvs[i].keyOn();
 }
 
 0.9 => dac.gain;
@@ -134,25 +135,28 @@ fun void setValsFromDistance(float dist) {
     // NOT GONNA USE THIS FOR NOW
     <<< fn, "/distance", dist >>>;
     // sensor vars
-    150.0 => float thresh;
+    250.0 => float thresh;
     10.0 => float distOffset;
-    float freqVal;
+    float amp;
 
     30 => int distSmoother; // val to feed normalize because minAmp is > 0
-
-    // set these
-    //20.0 => float ampScaler;
-    2.0 => float freqScaler;
-
-
+    
     // turn on sound if value below thresh
     if( dist < thresh && dist > 0.0 ) {
-        normalize(dist, thresh+distSmoother, distOffset) * freqScaler => freqVal;
-        <<< fn, "freqVal", freqVal >>>;
-        (freqHolder * freqScaler) => filters[0].freq;
-        (freqHolder * freqScaler) => filters[1].freq;
-        <<< fn, "freqVal", filters[0].freq() >>>;
+        normalize(dist, thresh+distSmoother, distOffset) => amp;
+        <<< fn, "sensorAmp", amp >>>;
+        amp * 1.5 => limEnvs[0].target;
+        amp * 0.9 => limEnvs[1].target;
+        spork ~ limEnvs[0].keyOn();
+        spork ~ limEnvs[1].keyOn();
     }
+    else {
+        1.0 => limEnvs[0].target;
+        1.0 => limEnvs[1].target;
+        spork ~ limEnvs[0].keyOn();
+        spork ~ limEnvs[1].keyOn();
+    }
+    
 }
 
 fun void endProgram() {
@@ -253,13 +257,16 @@ fun void bufChange( BPF bpf, Envelope env, Gain gain) {
     // pick random freq for BPF
     Math.random2f(250.0, 800.0) => freqHolder;
     freqHolder => bpf.freq;
-    5.0 => env.target;
+    //5.0 => env.target;
     //1.25 => gain.gain;
     
     <<< bpf.freq(), bpf.Q() >>>;  
     // turn back on
     env.keyOn();
     50::ms => now;
+    // crank the gain
+    90.0 => gain.gain;
+    
 
 }
 
