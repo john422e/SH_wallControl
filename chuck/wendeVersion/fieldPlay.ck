@@ -23,7 +23,6 @@ cassia channels:
 1 => int running;
 int synth;
 0.9 => float minAmp;
-float freqHolder;
 
 // time/event tracking
 0 => int second_i;
@@ -51,31 +50,19 @@ int synthStates[numSynths]; // set to 0 when not using, 1 turns on
 
 SndBuf bufs[numSynths];
 Envelope bufEnvs[numSynths];
-Dyno limiters[numSynths];
+Dyno comps[numSynths];
 BPF filters[numSynths];
-Gain makeUpGains[numSynths];
-Envelope limEnvs[numSynths];
+Gain gains[numSynths];
 
 // sound chains
-
-// for sensor sound => add second dyno for limiting/compression or enveloper at end of sound chain to control input signal (side chain)
-
-
 for( 0 => int i; i < numSynths; i++ ) {
-  bufs[i] => bufEnvs[i] => filters[i] => makeUpGains[i] => limiters[i] => limEnvs[i] => dac.chan(i);
-
-  // crank the gain
-  90.0 => makeUpGains[i].gain;
+  bufs[i] => bufEnvs[i] => comps[i] => filters[i] => gains[i] => dac.chan(i);
   // set filters
   filters[i].set(500.0, 0.58); // default filter settings (change freq?)
-  // turn on limiter
-  limiters[i].limit();
-  //0.9 => limiters[i].thresh;
-  //3.5 => limiters[i].slopeBelow;
-  //0.2 => limiters[i].slopeAbove;
-  // compensate for gain loss
-  5.0 => limiters[i].gain;
-  limEnvs[i].keyOn();
+  // set compressor settings
+  //comps[i].compress();
+  //0.7 => comps[i].thresh;
+  //20.0 => comps[i].ratio;
 }
 
 0.9 => dac.gain;
@@ -131,35 +118,31 @@ fun void setRandUpdates(int synthNum, int randState, int seed) {
 
     // TRYING WITHOUT THIS, REENABLE IF TOO WEIRD
 
-    if( randFilterUpdates[synthNum] == 1) spork ~ bufChange(filters[synthNum], bufEnvs[synthNum], makeUpGains[synthNum]);
+    if( randFilterUpdates[synthNum] == 1) spork ~ bufChange(filters[synthNum], bufEnvs[synthNum], gains[synthNum], 5.0);
 }
 
 fun void setValsFromDistance(float dist) {
     // NOT GONNA USE THIS FOR NOW
     <<< fn, "/distance", dist >>>;
     // sensor vars
-    250.0 => float thresh;
+    150.0 => float thresh;
     10.0 => float distOffset;
-    float amp;
+    float qVal;
 
     30 => int distSmoother; // val to feed normalize because minAmp is > 0
-    
+
+    // set these
+    1.05 => float extBoost;
+    20.0 => float ampScaler;
+    15.0 => float qScaler; // NOT USING THIS RIGHT NOW
+
+
     // turn on sound if value below thresh
     if( dist < thresh && dist > 0.0 ) {
-        normalize(dist, thresh+distSmoother, distOffset) => amp;
-        <<< fn, "sensorAmp", amp >>>;
-        amp * 1.5 => limEnvs[0].target;
-        amp * 0.9 => limEnvs[1].target;
-        spork ~ limEnvs[0].keyOn();
-        spork ~ limEnvs[1].keyOn();
+        normalize(dist, distOffset, thresh+distSmoother) * qScaler => qVal;
+        <<< fn, "qVal", qVal >>>;
+        (qVal+2) => filters[1].Q;
     }
-    else {
-        1.0 => limEnvs[0].target;
-        1.0 => limEnvs[1].target;
-        spork ~ limEnvs[0].keyOn();
-        spork ~ limEnvs[1].keyOn();
-    }
-    
 }
 
 fun void endProgram() {
@@ -204,7 +187,7 @@ fun void oscListener() {
             if( msg.address == "/randUpdates" ) setRandUpdates(synth, msg.getInt(1), msg.getInt(2));
 
             // gain
-            if( msg.address == "/bufGain") msg.getFloat(1) => makeUpGains[synth].gain;
+            if( msg.address == "/bufGain") msg.getFloat(1) => gains[synth].gain;
 
             // filter
             if( msg.address == "/bufFilterFreq") msg.getFloat(1) => filters[synth].freq;
@@ -243,34 +226,24 @@ fun void bufPlayLoop( SndBuf buf, Envelope env ) {
     env.keyOff();
 }
 
-
 // initiate random change in BPF
-fun void bufChange( BPF bpf, Envelope env, Gain gain) {
+fun void bufChange( BPF bpf, Envelope env, Gain gain, float q ) {
     <<< "fieldPlay.ck CHANGING BPF STATE" >>>;
-    
-    float q;
-    
     // turn off
     env.keyOff();
     50::ms => now;
     // make sure Q is at a high value
-    Math.random2f(5.0, 12.0) => q;
     //10.0 => bpf.Q;
     q => bpf.Q;
     // pick random freq for BPF
-    Math.random2f(250.0, 800.0) => freqHolder;
-    freqHolder => bpf.freq;
-    //5.0 => env.target;
-    //1.25 => gain.gain;
+    Math.random2f(250.0, 1000.0) => bpf.freq;
+    5.0 => env.target;
+    1.25 => gain.gain;
     
-    <<< bpf.freq(), bpf.Q() >>>;  
+    <<< bpf.freq(), bpf.Q() >>>;
     // turn back on
     env.keyOn();
     50::ms => now;
-    // crank the gain
-    //90.0 => gain.gain;
-    
-
 }
 
 // -----------------------------------------------------------------------------
@@ -286,7 +259,7 @@ while( running ) {
             Math.random2(0, 1) => eventTrigger;
             <<< "fieldPlay.ck 0 EVENT TRIGGER:", eventTrigger >>>;
             if( eventTrigger ) {
-                spork ~ bufChange(filters[0], bufEnvs[0], makeUpGains[0]); // higher Q for transducer
+                spork ~ bufChange(filters[0], bufEnvs[0], gains[0], 10.0); // higher Q for transducer
             }
         }
     }
@@ -296,7 +269,7 @@ while( running ) {
             Math.random2(0, 1) => eventTrigger;
             <<< "fieldPlay.ck 1 EVENT TRIGGER:", eventTrigger >>>;
             if( eventTrigger ) {
-                spork ~ bufChange(filters[1], bufEnvs[1], makeUpGains[1]); // lower Q for speaker
+                spork ~ bufChange(filters[1], bufEnvs[1], gains[1], 5.0); // lower Q for speaker
             }
         }
     }

@@ -1,34 +1,9 @@
-<<< "ADDING ALL SYNTHS TO SERVER" >>>;
+<<< "ADDING FB SENDER TO SERVER" >>>;
 
 1 => int running;
-"serverMaster.ck" => string fn;
+"localServer.ck" => string fn;
 
 me.dir() => string dir;
-
-
-// ADD ALL OF THESE FIRST, THEY'RE MANAGED SEPARATELY AFTERWARDS
-<<< "STARTING SENSOR CONTROL" >>>;
-// sensor control
-Machine.add(dir + "sensorSender.ck");
-
-<<< "STARTING PULSE SYNTH" >>>;
-// pulse mode
-Machine.add(dir + "pulseSynth.ck");
-
-<<< "STARTING STD SYNTH" >>>;
-// ternary code + pitch/blueprint mode
-Machine.add(dir + "stdSynth.ck");
-
-<<< "STARTING FIELDPLAY SYNTH" >>>;
-// fieldplay mode
-Machine.add(dir + "testField1.2.ck");
-//Machine.add(dir + "fieldPlay.ck");
-
-<<< "STARTING ALARM SYNTH" >>>;
-// alarm mode
-Machine.add(dir + "alarmSynth.ck");
-
-//1::second => now;
 
 // START A SERVER TO CONTROL FB RECEIVER
 
@@ -47,11 +22,11 @@ fun void oscListener() {
     while( true ) {
         in => now; // wait for message
         while( in.recv(msg) ) {
-            if( msg.address == "/fbReceiverState" ) {
+            if( msg.address == "/fbSenderState" ) {
                 msg.getInt(0) => fbState;
                 if( fbState == 1 ) {
                     // FB MODE
-                    Machine.add(dir + "fbReceiverSynth.ck") => fbid;
+                    Machine.add(dir + "fbSender.ck") => fbid;
                 }
                 if( fbState == 0) {
                     // TURN FB OFF

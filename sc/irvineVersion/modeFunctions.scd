@@ -91,7 +91,8 @@
 			arg i;
 			var freq;
 			i = i + 1;
-			freqMin = i * 100;
+			if( i == 1, { freqMin = 150 }, { freqMin = i * 100 });
+			//freqMin = i * 100;
 			freqMax = freqMin.pow(power);
 			//[freqMin, freqMax].postln; // range
 			freq = rrand(freqMin, freqMax);
@@ -148,29 +149,29 @@
 
 ~sfFiles = [
 	[
-		"../audio/desertNight/1.wav",
-		"../audio/desertNight/2.wav",
-		"../audio/desertNight/3.wav",
-		"../audio/desertNight/4.wav"
+		"../../audio/desertNight/1.wav",
+		"../../audio/desertNight/2.wav",
+		"../../audio/desertNight/3.wav",
+		"../../audio/desertNight/4.wav"
 	],
 	[
-		"../audio/desertQuiet/1.wav",
-		"../audio/desertQuiet/2.wav"
+		"../../audio/desertQuiet/1.wav",
+		"../../audio/desertQuiet/2.wav"
 	],
 	[
-		"../audio/desertTraffic/1.wav",
-		"../audio/desertTraffic/2.wav",
-		"../audio/desertTraffic/3.wav",
-		"../audio/desertTraffic/4.wav"
+		"../../audio/desertTraffic/1.wav",
+		"../../audio/desertTraffic/2.wav",
+		"../../audio/desertTraffic/3.wav",
+		"../../audio/desertTraffic/4.wav"
 	],
 	[
-		"../audio/interiors/1.wav",
-		"../audio/interiors/2.wav",
-		"../audio/interiors/3.wav",
-		"../audio/interiors/4.wav",
-		"../audio/interiors/5.wav",
-		"../audio/interiors/6.wav",
-		"../audio/interiors/7.wav"
+		"../../audio/interiors/1.wav",
+		"../../audio/interiors/2.wav",
+		"../../audio/interiors/3.wav",
+		"../../audio/interiors/4.wav",
+		"../../audio/interiors/5.wav",
+		"../../audio/interiors/6.wav",
+		"../../audio/interiors/7.wav"
 	]
 ];
 // need to be able to randomly select soundfile (by categories?),

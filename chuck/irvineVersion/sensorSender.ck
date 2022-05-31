@@ -1,6 +1,6 @@
 /*
 sensorSender.ck
---john eagle, jan 2022
+for SH@UCIrvine, June 2, 2022 - john eagle
 */
 
 // run this if python3 still open (debugging)
@@ -11,8 +11,8 @@ Std.system("pkill python3");
 // GLOBALS
 // -----------------------------------------------------------------------------
 1 => int running;
-"d3.py" => string sensorProgram; // d2 for simulation, d3 for realz
-
+//"d3.py" => string sensorProgram; // d2 for simulation, d3 for realz
+"d2.py" => string sensorProgram; // d2 for simulation, d3 for realz
 // -----------------------------------------------------------------------------
 // OSC
 // -----------------------------------------------------------------------------
@@ -42,7 +42,7 @@ in.listenAll(); // start listener
 fun void sensorInit() {
     // turns sensor program on
     <<< "sensorSender.ck TURNING SENSOR ON" >>>;
-    me.dir() + "../python/" + sensorProgram => string targetFile;
+    me.dir() + "../../python/" + sensorProgram => string targetFile;
     "python3 " + targetFile + " &" => string command;
     Std.system(command);
 }
