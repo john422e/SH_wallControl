@@ -315,20 +315,34 @@ modeButtons = [
 						turnOffOtherModes.(butt, modeButtons);
 						// activate sensor button if not already
 						if( sensorPingingState.value == 0, { sensorPingingState.valueAction_(1) });
-						// get random freqs
-						freqs = ~getRoomPitches.();
-						~sendSines.(freqs, synthNum, 2, gain); // try 2 harmonic synth?
+						Task {
+							// 1. add stdSynth.ck to remote server
+							~setStdSynth.(1);
+							// delay
+							~delayTime.wait;
+							// 2. get and send pitches
+							// get random freqs
+							freqs = ~getRoomPitches.();
+							~sendSines.(freqs, synthNum, 2, gain); // try 2 harmonic synth?
 
-						~modeBlock = true;
+							~modeBlock = true;
+						}.start;
 					},
 					{
 						// TURN OFF
 						// deactivate sensor button if not already
 						if( sensorPingingState.value == 1, { sensorPingingState.valueAction_(0) });
-						~turnSinesOff.(0); // turn off both synths
-						~turnSinesOff.(1);
+						Task {
+							// 1. turn off synths
+							~turnSinesOff.(0); // turn off both synths
+							~turnSinesOff.(1);
 
-						~modeBlock = false;
+							~modeBlock = false;
+							// delay
+							~delayTime.wait;
+							// 2. remove stdSynth.ck from remote server
+							~setStdSynth.(0);
+						}.start;
 				});
 			},
 			{

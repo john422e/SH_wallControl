@@ -7,15 +7,6 @@ for SH@UCIrvine, June 2, 2022 - john eagle
 
 me.dir() => string dir;
 
-
-//<<< "STARTING STD SYNTH" >>>;
-// ternary code + pitch/blueprint mode
-//Machine.add(dir + "stdSynth.ck");
-
-
-
-//1::second => now;
-
 // START A SERVER TO CONTROL FB RECEIVER
 
 // OSC
@@ -42,11 +33,6 @@ int fbID;
 
 int alarmState;
 int alarmID;
-
-
-
-
-
 
 fun void oscListener() {
     <<< fn, "LISTENING ON PORT:", port >>>;
@@ -129,15 +115,7 @@ fun void oscListener() {
                     // remove alarmSynth.ck from server
                     Machine.remove(alarmID);
                 }
-            }
-
-            
-            
-            
-            
-            
-            
-            
+            }          
             
             
             if( msg.address == "/fbReceiverState" ) {
