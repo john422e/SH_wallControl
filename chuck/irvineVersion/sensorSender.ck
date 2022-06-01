@@ -11,8 +11,8 @@ Std.system("pkill python3");
 // GLOBALS
 // -----------------------------------------------------------------------------
 1 => int running;
-//"d3.py" => string sensorProgram; // d2 for simulation, d3 for realz
-"d2.py" => string sensorProgram; // d2 for simulation, d3 for realz
+"d3.py" => string sensorProgram; // d2 for simulation, d3 for realz
+//"d2.py" => string sensorProgram; // d2 for simulation, d3 for realz
 // -----------------------------------------------------------------------------
 // OSC
 // -----------------------------------------------------------------------------
