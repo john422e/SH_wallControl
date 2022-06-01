@@ -74,7 +74,7 @@ for( 0 => int i; i < numSynths; i++ ) {
   //3.5 => limiters[i].slopeBelow;
   //0.2 => limiters[i].slopeAbove;
   // compensate for gain loss
-  5.0 => limiters[i].gain;
+  4.0 => limiters[i].gain;
   limEnvs[i].keyOn();
 }
 
