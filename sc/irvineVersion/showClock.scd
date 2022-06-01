@@ -101,3 +101,4 @@ r.play;
 
 )
 
+r.stop;

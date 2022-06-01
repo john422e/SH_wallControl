@@ -52,7 +52,7 @@ fun void oscListener() {
                     newState => sensorState;
                     if( sensorState == 1 ) {
                         // add sensorSender.ck to server and assign it an ID
-                        Machine.add(dir + "sensorSender.ck") => sensorID;
+                        Machine.add(dir + "mockSensorSender.ck") => sensorID;
                         <<< "ADDING SENSOR SENDER", sensorID >>>;
                     }
                     if( sensorState == 0 ) {

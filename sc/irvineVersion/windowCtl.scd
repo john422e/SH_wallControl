@@ -22,6 +22,12 @@ turnOffOtherModes = {
 	thisIndex = buttons.indexOf(butt);
 	buttons.do{
 		arg otherButt, i;
+		var waitTime;
+		// DELAY IT
+		//["THIS BUTT:", i, otherButt.states].postln;
+		waitTime = ~delayTime;
+		//if( i == 5, {waitTime = 1 + ~delayTime}, {waitTime = ~delayTime});
+		Task { waitTime.wait }.start;
 		if( (i != thisIndex) && (i > 1), {otherButt.valueAction_(0)});
 	};
 };
@@ -256,16 +262,18 @@ modeButtons = [
 						var synthNum=1, gain=0.5; // change this if needed
 						// TURN ON
 						// TURN ALL THE OTHER MODES OFF
-						//turnOffOtherModes.(butt, modeButtons);
-						// activate sensor button if not already
-						if( sensorPingingState.value == 0, { sensorPingingState.valueAction_(1) });
+						turnOffOtherModes.(butt, modeButtons);
+
 						~modeBlock = true; // prevents score program from switching out of this mode
+
 						Task {
 							// 1. add stdSynth.ck to remote server
-							~setStdSynth.(1);
+							~setStdSynth.("/ternaryState", 1);
 							// delay
 							~delayTime.wait;
 							// 2. send data
+							// activate sensor button if not already
+							{if( sensorPingingState.value == 0, { sensorPingingState.valueAction_(1) })}.defer;
 							~sendSines.(~ternaryFreqs, synthNum, 1, gain);
 
 
@@ -285,7 +293,7 @@ modeButtons = [
 							~delayTime.wait;
 
 							// 2. remove stdSynth.ck from remote server
-							~setStdSynth.(0);
+							~setStdSynth.("/ternaryState", 0);
 						}.start;
 				});
 			},
@@ -313,14 +321,15 @@ modeButtons = [
 						// TURN ON
 						// TURN ALL THE OTHER MODES OFF
 						turnOffOtherModes.(butt, modeButtons);
-						// activate sensor button if not already
-						if( sensorPingingState.value == 0, { sensorPingingState.valueAction_(1) });
+
 						Task {
 							// 1. add stdSynth.ck to remote server
-							~setStdSynth.(1);
+							~setStdSynth.("/roomModeState", 1);
 							// delay
 							~delayTime.wait;
 							// 2. get and send pitches
+							// activate sensor button if not already
+							{if( sensorPingingState.value == 0, { sensorPingingState.valueAction_(1) })}.defer;
 							// get random freqs
 							freqs = ~getRoomPitches.();
 							~sendSines.(freqs, synthNum, 2, gain); // try 2 harmonic synth?
@@ -341,7 +350,7 @@ modeButtons = [
 							// delay
 							~delayTime.wait;
 							// 2. remove stdSynth.ck from remote server
-							~setStdSynth.(0);
+							~setStdSynth.("/roomModeState", 0);
 						}.start;
 				});
 			},

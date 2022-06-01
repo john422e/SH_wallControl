@@ -10,7 +10,7 @@ me.dir() => string dir;
 // OSC
 OscIn in;
 OscMsg msg;
-10000 => int port;
+9998 => int port;
 port => in.port;
 in.listenAll();
 

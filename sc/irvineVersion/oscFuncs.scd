@@ -15,7 +15,7 @@
 };
 
 ~makeLocalHost = {
-	arg hostname = "127.0.0.1", port=10000;
+	arg hostname = "127.0.0.1", port=9998;
 	var host;
 	host = NetAddr.new( hostname, port);
 	host;
@@ -105,12 +105,12 @@
 
 // FOR TERNARY MODE AND BP ROOM MODE: TURN SYNTH ON/OFF
 ~setStdSynth = {
-	arg state = 1;
+	arg address, state = 1;
 	~hostsMaster.do( {
 		arg host;
 		"------------SETTING STD SYNTH".postln;
 		state.postln;
-		host.sendMsg( '/stdSynthState', state);
+		host.sendMsg(address, state);
 	});
 };
 
@@ -163,7 +163,7 @@
 		// 1. add pulseSynth.ck to remote server
 		~hostsMaster.do( {
 			arg host, i;
-			host.sendMsg('/pulseState', synthNums[i], 1);
+			host.sendMsg('/pulseState', 1);
 		});
 
 		// add delay here
@@ -193,17 +193,18 @@
 			arg host, i;
 			// turn off
 			host.sendMsg( '/pulseOff', synthNums[i]);
-			host.sendMsg( '/endProgram', synthNums[i]);
+			//host.sendMsg( '/endProgram', synthNums[i]);
 		});
 
 		// delay
 		~delayTime.wait;
 
 		// 2. remove pulseSynth.ck from remote server
-		~hostMaster.do( {
+		~hostsMaster.do( {
 			arg host, i;
 			// remove pulseSynth.ck from remote server
-			host.sendMsg('/pulseState', synthNums[i], 0);
+			"SENDING PULSE OFF".postln;
+			host.sendMsg('/pulseState', 0);
 		});
 	}.start;
 };
@@ -233,7 +234,7 @@
 	arg update=true, synthNum=1; // default to on (1) and speaker ( synth1 1)
 	var updates, gain;
 	// address, synthnum, state, seed (0-7)
-	if( update == true, { updates=Array.fill(8, {1}); gain=5.0}, { updates=Array.fill(8, {0}); gain=5.0});  // set default gain here!
+	if( update == true, { updates=Array.fill(8, {1}); gain=1.0}, { updates=Array.fill(8, {0}); gain=1.0});  // set default gain here (in first array!)!
 	~hostsParams.do( {
 		arg host, i;
 		// set
