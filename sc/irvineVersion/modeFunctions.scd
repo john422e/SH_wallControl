@@ -36,6 +36,38 @@
 		time = time + modeDur;
 	};
 	// return
+
+	// TESTING ONLY
+	returnList = [
+		[0.0, "shift change"],
+		[0.25, "FB"],
+		[0.5, "fieldplay"],
+		[0.75, "alarm"],
+		[1.0, "FB"],
+		[1.25, "FB"],
+		[1.5, "fieldplay"],
+		[1.75, "alarm"],
+		[2.0, "FB"],
+		[2.25, "FB"],
+		[2.5, "fieldplay"],
+		[2.75, "alarm"],
+		[3.0, "FB"],
+	];
+
+
+	// FOR RECORDING ONLY
+	/*
+	returnList = [
+		[0.0, "shift change"],
+		[3.0, "FB"],
+		[13.5, "fieldplay"],
+		[16.25, "alarm"],
+		[17.75, "FB"]
+	];
+	*/
+	// COMMENT THIS OUT FOR REAL SHOW
+
+
 	format("SHIFT EVENTS: %", returnList).postln;
 	returnList; // [ [time, mode], .... ]
 };
@@ -98,13 +130,13 @@
 			freq = rrand(freqMin, freqMax);
 	});
 
-	startFreqs.postln;
+	//startFreqs.postln;
 	freqs = Array.new(8);
 
 	startFreqs.do(
 		{
 			arg freq;
-			['freq', freq].postln;
+			//['freq', freq].postln;
 			// add each freq twice
 			freqs.add(freq);
 			freqs.add(freq);
@@ -118,7 +150,7 @@
 	arg pulseMin=0.5, pulseMax=3.0;
 	var pulseRate;
 	pulseRate = rrand(pulseMin, pulseMax);
-	["PULSE RATE:", pulseRate].postln;
+	//["PULSE RATE:", pulseRate].postln;
 	// return pulse rate
 	pulseRate;
 };
@@ -208,7 +240,7 @@
 		arg i;
 		category.wrapAt(i);
 	});
-	["FILES", fns].postln;
+	//["FILES", fns].postln;
 	fns;
 };
 

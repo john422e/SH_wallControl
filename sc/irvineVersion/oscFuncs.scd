@@ -108,8 +108,8 @@
 	arg address, state = 1;
 	~hostsMaster.do( {
 		arg host;
-		"------------SETTING STD SYNTH".postln;
-		state.postln;
+		//"------------SETTING STD SYNTH".postln;
+		//state.postln;
 		host.sendMsg(address, state);
 	});
 };
@@ -203,7 +203,7 @@
 		~hostsMaster.do( {
 			arg host, i;
 			// remove pulseSynth.ck from remote server
-			"SENDING PULSE OFF".postln;
+			//"SENDING PULSE OFF".postln;
 			host.sendMsg('/pulseState', 0);
 		});
 	}.start;
@@ -234,7 +234,7 @@
 	arg update=true, synthNum=1; // default to on (1) and speaker ( synth1 1)
 	var updates, gain;
 	// address, synthnum, state, seed (0-7)
-	if( update == true, { updates=Array.fill(8, {1}); gain=1.0}, { updates=Array.fill(8, {0}); gain=1.0});  // set default gain here (in first array!)!
+	if( update == true, { updates=Array.fill(8, {1}); gain=1.5}, { updates=Array.fill(8, {0}); gain=1.5});  // set default gain here (in first array!)!
 	~hostsParams.do( {
 		arg host, i;
 		// set
@@ -296,7 +296,7 @@
 				}.start;
 			},
 			{
-				"sending to host 0".postln;
+				//"sending to host 0".postln;
 				Task {
 					// 1. add alarmSynth.ck to remote server
 					~hostsMaster[0].sendMsg( '/alarmState', 1);
@@ -330,7 +330,7 @@
 				}.start;
 			},
 			{
-				"sending to host 0".postln;
+				//"sending to host 0".postln;
 				Task {
 					// 1. turn off alarm
 					~hostsParams[0].sendMsg( '/alarmOff');

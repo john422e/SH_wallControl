@@ -28,7 +28,7 @@ turnOffOtherModes = {
 		waitTime = ~delayTime;
 		//if( i == 5, {waitTime = 1 + ~delayTime}, {waitTime = ~delayTime});
 		Task { waitTime.wait }.start;
-		if( (i != thisIndex) && (i > 1), {otherButt.valueAction_(0)});
+		if( (i != thisIndex) && (i != 3) && (i != 4) && (i != 7) && (i > 1), {otherButt.valueAction_(0)});
 	};
 };
 
@@ -65,7 +65,7 @@ w.drawFunc = {
 			},
 			{
 				// TURN OFF FB SENDER
-				"TURNING OFF LOCAL FB SENDER".postln;
+				//"TURNING OFF LOCAL FB SENDER".postln;
 				~setLocalSender.(~localHost, 0);
 			}
 		);
@@ -87,12 +87,12 @@ w.drawFunc = {
 			if( butt.value == 1,
 				{
 					// TURN ON FB
-					format("FB % ON", i).postln;
+					//format("FB % ON", i).postln;
 					~hostsMaster[i].sendMsg("/fbReceiverState", 1);
 				},
 				{
 					// TURN OFF FB
-					format("FB % OFF", i).postln;
+					//format("FB % OFF", i).postln;
 					~hostsMaster[i].sendMsg("/fbReceiverState", 0);
 			});
 		});
@@ -200,7 +200,7 @@ modeButtons = [
 		arg butt;
 		// TURN SENSOR PROGRAM ON/OFF
 		if( butt.value == 1, { ~sensorInit.() }, { ~sensorShutdown.() } );
-		["SENSOR PROGRAM STATE:", butt.value].postln;
+		//["SENSOR PROGRAM STATE:", butt.value].postln;
 	}),
 
 	// 2. SENSOR PINGING STATE
@@ -221,7 +221,7 @@ modeButtons = [
 				"TURN SENSORS ON FIRST".postln;
 				butt.value_(0);
 		});
-		["SENSOR PINGING STATE:", butt.value].postln;
+		//["SENSOR PINGING STATE:", butt.value].postln;
 	}),
 
 	// 2. PULSE MODE
@@ -243,7 +243,7 @@ modeButtons = [
 				// TURN OFF
 				~turnPulseOff.();
 		});
-		["PULSE STATE:", butt.value].postln;
+		//["PULSE STATE:", butt.value].postln;
 	}),
 
 	// 3. TERNARY CODE
@@ -278,6 +278,7 @@ modeButtons = [
 
 
 						}.start;
+						//["MODE BLOCK TERNARY:", ~modeBlock].postln;
 					},
 					{
 						// TURN OFF
@@ -287,7 +288,7 @@ modeButtons = [
 						Task {
 							~turnSinesOff.(0); // turn off both synths
 							~turnSinesOff.(1);
-
+							//["UNBLOCKING TERNARY", ~modeBlock].postln;
 							~modeBlock = false;
 
 							~delayTime.wait;
@@ -301,7 +302,7 @@ modeButtons = [
 				"TURN SENSORS ON FIRST".postln;
 				butt.value_(0);
 		});
-		["TERNARY STATE:", ~ternaryState].postln;
+		//["TERNARY STATE:", ~ternaryState].postln;
 	}),
 
 	// 4. ROOM PITCH/BLUEPRINT MODE
@@ -333,7 +334,7 @@ modeButtons = [
 							// get random freqs
 							freqs = ~getRoomPitches.();
 							~sendSines.(freqs, synthNum, 2, gain); // try 2 harmonic synth?
-
+							//["BLOCKING ROOM MODE", ~modeBlock].postln;
 							~modeBlock = true;
 						}.start;
 					},
@@ -346,6 +347,7 @@ modeButtons = [
 							~turnSinesOff.(0); // turn off both synths
 							~turnSinesOff.(1);
 
+							//["UNBLOCKING ROOM MODE", ~modeBlock].postln;
 							~modeBlock = false;
 							// delay
 							~delayTime.wait;
@@ -358,7 +360,7 @@ modeButtons = [
 				"TURN SENSORS ON FIRST".postln;
 				butt.value_(0);
 		});
-		["TERNARY STATE:", butt.value].postln;
+		//["ROOM MODE STATE:", butt.value].postln;
 	}),
 
 	// 5. FIELD RECORDING MODE
@@ -404,7 +406,7 @@ modeButtons = [
 					~setFieldPlaySynth.(0);
 				}.start;
 		});
-		["FIELDPLAY STATE:", butt.value].postln;
+		//["FIELDPLAY STATE:", butt.value].postln;
 	}),
 
 	// 6. FEEDBACK MODE
@@ -419,9 +421,9 @@ modeButtons = [
 			{
 				// TURN ON
 				// TURN ALL THE OTHER MODES OFF
-				turnOffOtherModes.(butt, modeButtons);
+				//turnOffOtherModes.(butt, modeButtons);
 				// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
-				"FEEDBACK ON".postln;
+				//"FEEDBACK ON".postln;
 				// turn on pi receivers
 				~setFeedbackReceivers.(1);
 				fbButtonsView.children.do( { arg fbButt; fbButt.valueAction_(1); });
@@ -432,14 +434,14 @@ modeButtons = [
 			{
 				// TURN OFF
 				// SEND WHATEVER UPDATE IS NEEDED TO PIS HERE
-				"FEEDBACK OFF".postln;
+				//"FEEDBACK OFF".postln;
 				// turn off pi receivers
 				~setFeedbackReceivers.(0);
 				fbButtonsView.children.do( { arg fbButt; fbButt.valueAction_(0); });
 				// turn off sender
 				//~setLocalSender.(~localHost, 0);
 		});
-		["FEEDBACK STATE:", butt.value].postln;
+		//["FEEDBACK STATE:", butt.value].postln;
 	}),
 
 	// 7. ALARM MODE
@@ -459,18 +461,19 @@ modeButtons = [
 				~wallAlarms = ~getAlarmWalls.(numAlarms); // ~wallAlarms needs to be global to be turned off later
 				~wallAlarms.postln;
 				~turnAlarmOn.(~wallAlarms);
-
+				//["BLOCKING ALARM", ~modeBlock].postln;
 				~modeBlock = true;
 			},
 			{
 				// TURN OFF
 				~turnAlarmOff.(~wallAlarms);
 
+				//["UNBLOCKING ALARM", ~modeBlock].postln;
 				~modeBlock = false;
 				// turn on fieldPlay when deactivating alarm
 				//fieldPlayState.valueAction_(1);
 		});
-		["ALARM STATE:", butt.value].postln;
+		//["ALARM STATE:", butt.value].postln;
 	}),
 
 	// 8. ADD ANY HYBRID MODES LIKE THIS
@@ -490,9 +493,9 @@ modeButtons = [
 			},
 			{
 				// TURN OFF
-				"TURNING OFF".postln;
+				//"TURNING OFF".postln;
 		});
-		["HYBRID STATE:", butt.value].postln;
+		//["HYBRID STATE:", butt.value].postln;
 	})
 ];
 
@@ -711,10 +714,13 @@ r = Routine {
 			// POST TIME/STATE UPDATE EVERY MINUTE
 			if( time.mod(1) == 0, {
 				format("SCORE LOG: shift: % time: %:00., current state: %", i, time.asInteger, ~currentState).postln;
+				["EVENTS THIS SHIFT", events].postln;
 				//["SHIFT:", i, "MINUTES:", time.asInteger, "CURRENT STATE:", ~currentState].postln;
 			},
 			{
 				format("SCORE LOG: time: %:% seconds", time.asInteger, (time*60).mod(60).asInteger).postln;
+				["EVENTS THIS SHIFT", events].postln;
+				//["MODE BLOCK:", ~modeBlock].postln;
 				//["TIME:", time.mod(1).round(1).asInteger, (time*60).asInteger].postln;
 			});
 
@@ -743,4 +749,13 @@ r = Routine {
 
 // RUN IT
 r.play;
+(
 r.stop;
+r.reset;
+r.clear;
+r.clock.clear;
+r.free;
+)
+
+
+~modeBlock.postln;
